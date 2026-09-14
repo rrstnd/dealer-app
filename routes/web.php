@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\VehicleImageController;
 use App\Http\Controllers\Admin\SaleController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\VehicleController as WebsiteVehicleController;
+use App\Http\Controllers\Admin\ReportController;
 
 
 /*
@@ -108,7 +109,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/sales/{sale}/edit', [SaleController::class, 'edit'])
         ->name('sales.edit');
-        
+
     Route::get('/sales/{sale}', [SaleController::class, 'show'])
         ->name('sales.show');
 
@@ -117,4 +118,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel'])
         ->name('sales.cancel');
+    
+    Route::get('/reports', [ReportController::class, 'sales'])
+    ->name('reports.sales');
 });

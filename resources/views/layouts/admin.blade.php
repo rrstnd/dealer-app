@@ -51,7 +51,7 @@
                         <span>Keuangan</span>
                 </a>
 
-                <a href="#"
+                <a href="{{ route('admin.reports.sales') }}"
                    class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
                     <span>📊</span>
                     <span>Laporan</span>

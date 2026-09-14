@@ -198,7 +198,7 @@
                                               hover:bg-slate-100
                                               rounded-lg">
 
-                                        👁️
+                                        Detail
 
                                     </a>
 
@@ -208,7 +208,7 @@
                                               hover:bg-blue-50
                                               rounded-lg">
 
-                                        ✏️
+                                        Edit
 
                                     </a>
 
@@ -228,7 +228,7 @@
                                                    hover:bg-red-50
                                                    rounded-lg">
 
-                                            🗑️
+                                            Hapus
 
                                         </button>
 
