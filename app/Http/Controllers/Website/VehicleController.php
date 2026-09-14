@@ -15,7 +15,8 @@ class VehicleController extends Controller
         $request->validate([
             'search' => 'nullable|string|max:100',
 
-            'brand_id' => 'nullable|integer|exists:vehicle_brands,id',
+            'vehicle_type_id' => 'nullable|integer|exists:vehicle_types,id',
+            'brand_id' => 'nullable|integer|exists:brands,id',
 
             'year_min' => 'nullable|integer|min:1900|max:2100',
             'year_max' => 'nullable|integer|min:1900|max:2100',
@@ -48,6 +49,11 @@ class VehicleController extends Controller
                         $q->where('name', 'like', "%{$search}%");
                     });
             });
+        }
+
+        // Filter Vehicle Type (Mobil / Motor)
+        if ($request->filled('vehicle_type_id')) {
+            $query->where('vehicle_type_id', $request->vehicle_type_id);
         }
 
         // Filter Brand
@@ -101,10 +107,11 @@ class VehicleController extends Controller
             ->withQueryString();
 
         $brands = Brand::orderBy('name')->get();
+        $vehicleTypes = \App\Models\VehicleType::orderBy('name')->get();
 
         return view(
             'website.vehicles.index',
-            compact('vehicles', 'brands')
+            compact('vehicles', 'brands', 'vehicleTypes')
         );
     }
 

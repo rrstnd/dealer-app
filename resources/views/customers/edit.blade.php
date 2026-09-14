@@ -1,297 +1,246 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Customer')
-@section('page-title', 'Edit Customer')
+@section('title', 'Edit Customer - ' . $customer->name)
+@section('page-title', 'Customer Management')
 
 @section('content')
+<div class="max-w-4xl mx-auto space-y-6">
 
-<div class="max-w-5xl mx-auto space-y-6">
-
-    {{-- HEADER --}}
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
+    {{-- HEADER & BREADCRUMB --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
-            <h1 class="text-2xl font-bold text-slate-800">
-                Edit Customer
+            <a href="{{ route('admin.customers.index') }}"
+               class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition mb-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Kembali ke Daftar Customer
+            </a>
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">
+                Edit Data Customer
             </h1>
-
-            <p class="text-sm text-slate-500 mt-1">
-                Perbarui informasi customer
+            <p class="text-xs font-medium text-slate-500 mt-0.5">
+                Perbarui informasi identitas, alamat, atau kontak milik {{ $customer->name }}
             </p>
         </div>
-
-        <a href="{{ route('admin.customers.show', $customer) }}"
-           class="px-4 py-2.5 border border-slate-300 rounded-lg
-                  text-slate-600 hover:bg-slate-100 transition">
-            ← Kembali
-        </a>
-
     </div>
 
-
-    {{-- ERROR VALIDATION --}}
+    {{-- ERROR ALERT --}}
     @if ($errors->any())
-
-        <div class="bg-red-50 border border-red-200 rounded-xl p-5">
-
-            <div class="font-semibold text-red-700 mb-2">
-                Terdapat kesalahan:
+        <div class="p-4 bg-rose-50 border border-rose-200/80 rounded-xl text-rose-800 text-xs space-y-1">
+            <div class="font-bold flex items-center gap-2">
+                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Mohon perbaiki kesalahan berikut:</span>
             </div>
-
-            <ul class="list-disc list-inside text-sm text-red-600 space-y-1">
-
+            <ul class="list-disc list-inside pl-6 space-y-0.5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
-
             </ul>
-
         </div>
-
     @endif
 
-
-    {{-- FORM --}}
-    <form
-        action="{{ route('admin.customers.update', $customer) }}"
-        method="POST"
-        class="space-y-6"
-    >
-
+    {{-- FORM CARD --}}
+    <form action="{{ route('admin.customers.update', $customer) }}" method="POST" class="space-y-6">
         @csrf
         @method('PUT')
 
-
-        {{-- DATA PRIBADI --}}
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-
-            <h2 class="text-lg font-semibold text-slate-800 mb-6">
-                Data Pribadi
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-
-                {{-- ID CUSTOMER --}}
+        {{-- SECTION 1: IDENTITAS & KONTAK --}}
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div class="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
                 <div>
+                    <h2 class="font-bold text-slate-900 text-base">Identitas & Informasi Utama</h2>
+                    <p class="text-xs text-slate-400">Data identitas resmi dan saluran komunikasi pelanggan</p>
+                </div>
+            </div>
 
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        ID Customer
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {{-- KODE CUSTOMER --}}
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                        Kode Customer <span class="text-rose-500">*</span>
                     </label>
-
                     <input
                         type="text"
                         name="customer_code"
                         value="{{ old('customer_code', $customer->customer_code) }}"
+                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl font-mono
+                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                               transition outline-none text-slate-800"
                         required
-                        class="w-full px-4 py-3 border border-slate-300
-                               rounded-lg focus:ring-2 focus:ring-slate-400
-                               focus:border-slate-400 outline-none"
                     >
-
                 </div>
 
-
-                {{-- NAMA --}}
+                {{-- NAMA LENGKAP --}}
                 <div>
-
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        Nama Lengkap
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                        Nama Lengkap <span class="text-rose-500">*</span>
                     </label>
-
                     <input
                         type="text"
                         name="name"
                         value="{{ old('name', $customer->name) }}"
+                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
+                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                               transition outline-none text-slate-800"
                         required
-                        class="w-full px-4 py-3 border border-slate-300
-                               rounded-lg focus:ring-2 focus:ring-slate-400
-                               focus:border-slate-400 outline-none"
                     >
-
                 </div>
-
 
                 {{-- NIK --}}
                 <div>
-
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        NIK
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                        NIK (KTP)
                     </label>
-
                     <input
                         type="text"
                         name="nik"
                         value="{{ old('nik', $customer->nik) }}"
-                        class="w-full px-4 py-3 border border-slate-300
-                               rounded-lg focus:ring-2 focus:ring-slate-400
-                               focus:border-slate-400 outline-none"
+                        maxlength="16"
+                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl font-mono
+                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                               transition outline-none text-slate-800"
                     >
-
                 </div>
 
-
-                {{-- PHONE --}}
+                {{-- NO HP --}}
                 <div>
-
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        No. HP
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                        No. HP / WhatsApp <span class="text-rose-500">*</span>
                     </label>
-
                     <input
                         type="text"
                         name="phone"
                         value="{{ old('phone', $customer->phone) }}"
+                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
+                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                               transition outline-none text-slate-800"
                         required
-                        class="w-full px-4 py-3 border border-slate-300
-                               rounded-lg focus:ring-2 focus:ring-slate-400
-                               focus:border-slate-400 outline-none"
                     >
-
                 </div>
 
-
                 {{-- EMAIL --}}
-                <div class="md:col-span-2">
-
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        Email
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                        Alamat Email
                     </label>
-
                     <input
                         type="email"
                         name="email"
                         value="{{ old('email', $customer->email) }}"
-                        class="w-full px-4 py-3 border border-slate-300
-                               rounded-lg focus:ring-2 focus:ring-slate-400
-                               focus:border-slate-400 outline-none"
+                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
+                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                               transition outline-none text-slate-800"
                     >
-
                 </div>
-
             </div>
-
         </div>
 
-
-        {{-- ALAMAT --}}
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-
-            <h2 class="text-lg font-semibold text-slate-800 mb-6">
-                Alamat
-            </h2>
-
-            <div class="space-y-5">
-
-
-                {{-- ALAMAT LENGKAP --}}
+        {{-- SECTION 2: ALAMAT DOMISILI --}}
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
                 <div>
+                    <h2 class="font-bold text-slate-900 text-base">Alamat Domisili</h2>
+                    <p class="text-xs text-slate-400">Lokasi tempat tinggal untuk pengiriman unit / STNK</p>
+                </div>
+            </div>
 
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        Alamat Lengkap
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {{-- ALAMAT LENGKAP --}}
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                        Alamat Lengkap (Jalan, RT/RW, Kecamatan)
                     </label>
-
                     <textarea
                         name="address"
-                        rows="4"
-                        class="w-full px-4 py-3 border border-slate-300
-                               rounded-lg focus:ring-2 focus:ring-slate-400
-                               focus:border-slate-400 outline-none"
+                        rows="3"
+                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
+                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                               transition outline-none text-slate-800"
                     >{{ old('address', $customer->address) }}</textarea>
-
                 </div>
 
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                    {{-- KOTA --}}
-                    <div>
-
-                        <label class="block text-sm font-medium text-slate-700 mb-2">
-                            Kota
-                        </label>
-
-                        <input
-                            type="text"
-                            name="city"
-                            value="{{ old('city', $customer->city) }}"
-                            class="w-full px-4 py-3 border border-slate-300
-                                   rounded-lg focus:ring-2 focus:ring-slate-400
-                                   focus:border-slate-400 outline-none"
-                        >
-
-                    </div>
-
-
-                    {{-- PROVINSI --}}
-                    <div>
-
-                        <label class="block text-sm font-medium text-slate-700 mb-2">
-                            Provinsi
-                        </label>
-
-                        <input
-                            type="text"
-                            name="province"
-                            value="{{ old('province', $customer->province) }}"
-                            class="w-full px-4 py-3 border border-slate-300
-                                   rounded-lg focus:ring-2 focus:ring-slate-400
-                                   focus:border-slate-400 outline-none"
-                        >
-
-                    </div>
-
+                {{-- KOTA --}}
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                        Kota / Kabupaten
+                    </label>
+                    <input
+                        type="text"
+                        name="city"
+                        value="{{ old('city', $customer->city) }}"
+                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
+                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                               transition outline-none text-slate-800"
+                    >
                 </div>
 
+                {{-- PROVINSI --}}
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                        Provinsi
+                    </label>
+                    <input
+                        type="text"
+                        name="province"
+                        value="{{ old('province', $customer->province) }}"
+                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
+                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                               transition outline-none text-slate-800"
+                    >
+                </div>
             </div>
-
         </div>
 
-
-        {{-- CATATAN --}}
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-
-            <h2 class="text-lg font-semibold text-slate-800 mb-6">
-                Catatan
-            </h2>
+        {{-- SECTION 3: CATATAN --}}
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 space-y-4">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div class="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-900 text-base">Catatan Tambahan</h2>
+                    <p class="text-xs text-slate-400">Preferensi khusus, catatan leasing, atau preferensi unit</p>
+                </div>
+            </div>
 
             <textarea
                 name="notes"
-                rows="4"
-                placeholder="Catatan tambahan..."
-                class="w-full px-4 py-3 border border-slate-300
-                       rounded-lg focus:ring-2 focus:ring-slate-400
-                       focus:border-slate-400 outline-none"
+                rows="3"
+                class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
+                       focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                       transition outline-none text-slate-800"
             >{{ old('notes', $customer->notes) }}</textarea>
-
         </div>
 
-
-        {{-- BUTTON --}}
-        <div class="flex flex-col-reverse md:flex-row md:justify-end gap-3">
-
-            <a
-                href="{{ route('admin.customers.show', $customer) }}"
-                class="px-6 py-3 border border-slate-300 rounded-lg
-                       text-slate-600 text-center hover:bg-slate-100 transition"
-            >
+        {{-- ACTION BUTTONS --}}
+        <div class="flex items-center justify-end gap-3 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+            <a href="{{ route('admin.customers.show', $customer) }}"
+               class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-semibold rounded-xl transition">
                 Batal
             </a>
-
-            <button
-                type="submit"
-                class="px-6 py-3 bg-slate-900 text-white rounded-lg
-                       hover:bg-slate-700 transition"
-            >
-                💾 Simpan Perubahan
+            <button type="submit"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-blue-500/20 transition active:scale-[0.98]">
+                Perbarui Customer
             </button>
-
         </div>
-
     </form>
-
 </div>
-
 @endsection
 
 
