@@ -9,7 +9,7 @@
 
     <div class="mb-6">
 
-        <a href="{{ route('customers.index') }}"
+        <a href="{{ route('admin.customers.index') }}"
            class="text-sm text-slate-500 hover:text-slate-800">
 
             ← Kembali ke Customer
@@ -27,7 +27,7 @@
     </div>
 
 
-    <form action="{{ route('customers.store') }}"
+    <form action="{{ route('admin.customers.store') }}"
           method="POST"
           class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
 
@@ -244,7 +244,7 @@
         {{-- BUTTON --}}
         <div class="flex justify-end gap-3 border-t pt-5">
 
-            <a href="{{ route('customers.index') }}"
+            <a href="{{ route('admin.customers.index') }}"
                class="px-5 py-3 border border-slate-300 rounded-lg hover:bg-slate-100">
 
                 Batal
@@ -266,3 +266,6 @@
 </div>
 
 @endsection
+
+
+

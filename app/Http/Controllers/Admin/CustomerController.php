@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -55,7 +56,7 @@ class CustomerController extends Controller
         Customer::create($validated);
 
         return redirect()
-            ->route('customers.index')
+            ->route('admin.customers.index')
             ->with('success', 'Customer berhasil ditambahkan.');
     }
 
@@ -87,7 +88,7 @@ class CustomerController extends Controller
         $customer->update($validated);
 
         return redirect()
-            ->route('customers.index')
+            ->route('admin.customers.index')
             ->with('success', 'Customer berhasil diperbarui.');
     }
 
@@ -96,7 +97,7 @@ class CustomerController extends Controller
         $customer->delete();
 
         return redirect()
-            ->route('customers.index')
+            ->route('admin.customers.index')
             ->with('success', 'Customer berhasil dihapus.');
     }
 }

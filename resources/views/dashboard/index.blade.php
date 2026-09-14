@@ -53,7 +53,7 @@
             </div>
 
             <a
-                href="{{ route('vehicles.index') }}"
+                href="{{ route('admin.vehicles.index') }}"
                 class="text-sm font-medium text-blue-600 hover:text-blue-700"
             >
                 Lihat Semua →
@@ -69,7 +69,7 @@
                 @foreach($vehicles as $vehicle)
 
                     <a
-                        href="{{ route('vehicles.show', $vehicle) }}"
+                        href="{{ route('admin.vehicles.show', $vehicle) }}"
                         class="group bg-white rounded-xl border border-slate-200
                                overflow-hidden hover:shadow-lg transition"
                     >
@@ -195,7 +195,7 @@
                 </p>
 
                 <a
-                    href="{{ route('vehicles.create') }}"
+                    href="{{ route('admin.vehicles.create') }}"
                     class="inline-block mt-4 px-4 py-2
                            bg-slate-900 text-white rounded-lg
                            text-sm"
@@ -266,7 +266,7 @@
             <div class="p-5 space-y-3">
 
                 <a
-                    href="{{ route('vehicles.create') }}"
+                    href="{{ route('admin.vehicles.create') }}"
                     class="flex items-center gap-3 p-4 rounded-xl
                            bg-slate-50 hover:bg-slate-100 transition"
                 >
@@ -285,7 +285,7 @@
 
 
                 <a
-                    href="{{ route('vehicles.index') }}"
+                    href="{{ route('admin.vehicles.index') }}"
                     class="flex items-center gap-3 p-4 rounded-xl
                            bg-slate-50 hover:bg-slate-100 transition"
                 >
@@ -304,7 +304,7 @@
 
 
                 <a
-                    href="{{ route('customers.index') }}"
+                    href="{{ route('admin.customers.index') }}"
                     class="flex items-center gap-3 p-4 rounded-xl
                            bg-slate-50 hover:bg-slate-100 transition"
                 >
@@ -330,3 +330,6 @@
 </div>
 
 @endsection
+
+
+

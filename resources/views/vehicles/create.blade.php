@@ -10,7 +10,7 @@
 
     <h1>Tambah Kendaraan</h1>
 
-    <a href="{{ route('vehicles.index') }}">
+    <a href="{{ route('admin.vehicles.index') }}">
         ← Kembali ke Inventory
     </a>
 
@@ -30,7 +30,7 @@
         <hr>
     @endif
 
-    <form action="{{ route('vehicles.store') }}" method="POST">
+    <form action="{{ route('admin.vehicles.store') }}" method="POST">
 
         @csrf
 
@@ -280,3 +280,6 @@
 
 </body>
 </html>
+
+
+

@@ -56,7 +56,7 @@
         @endif
 
         <form
-            action="{{ route('vehicles.images.store', $vehicle) }}"
+            action="{{ route('admin.vehicles.images.store', $vehicle) }}"
             method="POST"
             enctype="multipart/form-data"
         >
@@ -106,7 +106,7 @@
                             </div>
                         @else
                             <form
-                                action="{{ route('vehicles.images.primary', [$vehicle, $image]) }}"
+                                action="{{ route('admin.vehicles.images.primary', [$vehicle, $image]) }}"
                                 method="POST"
                                 class="mt-2"
                             >
@@ -123,7 +123,7 @@
                         @endif
 
                         <form
-                            action="{{ route('vehicles.images.destroy', [$vehicle, $image]) }}"
+                            action="{{ route('admin.vehicles.images.destroy', [$vehicle, $image]) }}"
                             method="POST"
                             class="mt-2"
                         >
@@ -158,3 +158,7 @@
 </div>
 
 @endsection
+
+
+
+

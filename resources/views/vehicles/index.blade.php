@@ -28,7 +28,7 @@
             </div>
 
             <a
-                href="{{ route('vehicles.create') }}"
+                href="{{ route('admin.vehicles.create') }}"
                 class="inline-flex items-center justify-center gap-2
                        px-5 py-2.5 bg-slate-900 text-white rounded-lg
                        hover:bg-slate-800 transition font-medium"
@@ -53,7 +53,7 @@
         {{-- SEARCH & FILTER --}}
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6">
 
-            <form method="GET" action="{{ route('vehicles.index') }}">
+            <form method="GET" action="{{ route('admin.vehicles.index') }}">
 
                 <div class="flex flex-col lg:flex-row gap-4">
 
@@ -162,7 +162,7 @@
                         </button>
 
                         <a
-                            href="{{ route('vehicles.index') }}"
+                            href="{{ route('admin.vehicles.index') }}"
                             class="px-5 py-2.5
                                    bg-slate-100 text-slate-700 rounded-lg
                                    hover:bg-slate-200 transition
@@ -313,7 +313,7 @@
                                         <div class="flex items-center gap-2">
 
                                             <a
-                                                href="{{ route('vehicles.show', $vehicle) }}"
+                                                href="{{ route('admin.vehicles.show', $vehicle) }}"
                                                 class="px-3 py-1.5 text-xs font-medium
                                                        rounded-lg bg-slate-100
                                                        text-slate-700
@@ -323,7 +323,7 @@
                                             </a>
 
                                             <a
-                                                href="{{ route('vehicles.edit', $vehicle) }}"
+                                                href="{{ route('admin.vehicles.edit', $vehicle) }}"
                                                 class="px-3 py-1.5 text-xs font-medium
                                                        rounded-lg bg-blue-100
                                                        text-blue-700
@@ -333,7 +333,7 @@
                                             </a>
 
                                             <form
-                                                action="{{ route('vehicles.destroy', $vehicle) }}"
+                                                action="{{ route('admin.vehicles.destroy', $vehicle) }}"
                                                 method="POST"
                                                 onsubmit="return confirm('Yakin ingin menghapus kendaraan ini?')"
                                             >
@@ -418,3 +418,6 @@
 </body>
 
 </html>
+
+
+

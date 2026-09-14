@@ -9,7 +9,7 @@
 
 <h1>Edit Kendaraan</h1>
 
-<a href="{{ route('vehicles.index') }}">
+<a href="{{ route('admin.vehicles.index') }}">
     ← Kembali ke Inventory
 </a>
 
@@ -29,7 +29,7 @@
     <hr>
 @endif
 
-<form action="{{ route('vehicles.update', $vehicle) }}" method="POST">
+<form action="{{ route('admin.vehicles.update', $vehicle) }}" method="POST">
 
     @csrf
     @method('PUT')
@@ -331,3 +331,6 @@
 
 </body>
 </html>
+
+
+

@@ -27,19 +27,19 @@
             {{-- Navigation --}}
             <nav class="flex-1 px-4 py-6 space-y-2">
 
-                <a href="{{ route('dashboard') }}"
+                <a href="{{ route('admin.dashboard') }}"
                    class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800">
                     <span>🏠</span>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="{{ route('vehicles.index') }}"
+                <a href="{{ route('admin.vehicles.index') }}"
                    class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
                     <span>🚗</span>
                     <span>Inventory</span>
                 </a>
 
-                <a href="{{ route('customers.index') }}"
+                <a href="{{ route('admin.customers.index') }}"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
                         <span>👥</span>
                         <span>Customer</span>
@@ -140,3 +140,6 @@
 
 </body>
 </html>
+
+
+

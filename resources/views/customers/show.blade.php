@@ -22,13 +22,13 @@
 
         <div class="flex gap-3">
 
-            <a href="{{ route('customers.index') }}"
+            <a href="{{ route('admin.customers.index') }}"
                class="px-4 py-2.5 border border-slate-300 rounded-lg
                       text-slate-600 hover:bg-slate-100 transition">
                 ← Kembali
             </a>
 
-            <a href="{{ route('customers.edit', $customer) }}"
+            <a href="{{ route('admin.customers.edit', $customer) }}"
                class="px-4 py-2.5 bg-slate-900 text-white rounded-lg
                       hover:bg-slate-700 transition">
                 ✏️ Edit Customer
@@ -239,7 +239,7 @@
 
 
         <form
-            action="{{ route('customers.destroy', $customer) }}"
+            action="{{ route('admin.customers.destroy', $customer) }}"
             method="POST"
             onsubmit="return confirm('Yakin ingin menghapus customer ini?')"
         >
@@ -262,3 +262,6 @@
 </div>
 
 @endsection
+
+
+

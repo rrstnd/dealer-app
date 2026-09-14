@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
@@ -62,7 +63,7 @@ class VehicleController extends Controller
         $vehicle->delete();
 
         return redirect()
-            ->route('vehicles.index')
+            ->route('admin.vehicles.index')
             ->with('success', 'Kendaraan berhasil dihapus.');
     }
 
@@ -106,7 +107,7 @@ class VehicleController extends Controller
         Vehicle::create($validated);
 
         return redirect()
-            ->route('vehicles.index')
+            ->route('admin.vehicles.index')
             ->with('success', 'Kendaraan berhasil ditambahkan.');
     }
 
@@ -152,7 +153,7 @@ class VehicleController extends Controller
         $vehicle->update($validated);
 
         return redirect()
-            ->route('vehicles.index')
+            ->route('admin.vehicles.index')
             ->with('success', 'Kendaraan berhasil diperbarui.');
     }
    

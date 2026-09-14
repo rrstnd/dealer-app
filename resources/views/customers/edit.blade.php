@@ -20,7 +20,7 @@
             </p>
         </div>
 
-        <a href="{{ route('customers.show', $customer) }}"
+        <a href="{{ route('admin.customers.show', $customer) }}"
            class="px-4 py-2.5 border border-slate-300 rounded-lg
                   text-slate-600 hover:bg-slate-100 transition">
             ← Kembali
@@ -53,7 +53,7 @@
 
     {{-- FORM --}}
     <form
-        action="{{ route('customers.update', $customer) }}"
+        action="{{ route('admin.customers.update', $customer) }}"
         method="POST"
         class="space-y-6"
     >
@@ -271,7 +271,7 @@
         <div class="flex flex-col-reverse md:flex-row md:justify-end gap-3">
 
             <a
-                href="{{ route('customers.show', $customer) }}"
+                href="{{ route('admin.customers.show', $customer) }}"
                 class="px-6 py-3 border border-slate-300 rounded-lg
                        text-slate-600 text-center hover:bg-slate-100 transition"
             >
@@ -293,3 +293,6 @@
 </div>
 
 @endsection
+
+
+

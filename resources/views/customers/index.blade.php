@@ -20,7 +20,7 @@
             </p>
         </div>
 
-        <a href="{{ route('customers.create') }}"
+        <a href="{{ route('admin.customers.create') }}"
            class="inline-flex items-center justify-center gap-2
                   bg-slate-900 text-white
                   px-5 py-3 rounded-lg
@@ -51,7 +51,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
 
         <form method="GET"
-              action="{{ route('customers.index') }}"
+              action="{{ route('admin.customers.index') }}"
               class="flex flex-col md:flex-row gap-3">
 
             <div class="flex-1">
@@ -84,7 +84,7 @@
 
             @if(request('search'))
 
-                <a href="{{ route('customers.index') }}"
+                <a href="{{ route('admin.customers.index') }}"
                    class="px-6 py-3
                           border border-slate-300
                           rounded-lg
@@ -192,7 +192,7 @@
 
                                 <div class="flex justify-end items-center gap-2">
 
-                                    <a href="{{ route('customers.show', $customer) }}"
+                                    <a href="{{ route('admin.customers.show', $customer) }}"
                                        class="px-3 py-2
                                               text-slate-600
                                               hover:bg-slate-100
@@ -202,7 +202,7 @@
 
                                     </a>
 
-                                    <a href="{{ route('customers.edit', $customer) }}"
+                                    <a href="{{ route('admin.customers.edit', $customer) }}"
                                        class="px-3 py-2
                                               text-blue-600
                                               hover:bg-blue-50
@@ -213,7 +213,7 @@
                                     </a>
 
                                     <form
-                                        action="{{ route('customers.destroy', $customer) }}"
+                                        action="{{ route('admin.customers.destroy', $customer) }}"
                                         method="POST"
                                         onsubmit="return confirm('Yakin ingin menghapus customer ini?')"
                                     >
@@ -320,3 +320,6 @@
 </div>
 
 @endsection
+
+
+
