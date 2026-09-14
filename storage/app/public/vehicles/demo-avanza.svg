@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+<rect width="1200" height="700" fill="#e5e7eb"/>
+<rect x="150" y="250" width="900" height="220" rx="40" fill="#374151"/>
+<path d="M300 250 L410 130 L790 130 L900 250 Z" fill="#6b7280"/>
+<rect x="430" y="155" width="140" height="90" fill="#dbeafe"/>
+<rect x="590" y="155" width="160" height="90" fill="#dbeafe"/>
+<circle cx="340" cy="480" r="70" fill="#111827"/>
+<circle cx="860" cy="480" r="70" fill="#111827"/>
+<circle cx="340" cy="480" r="30" fill="#9ca3af"/>
+<circle cx="860" cy="480" r="30" fill="#9ca3af"/>
+<text x="600" y="600" text-anchor="middle" font-family="Arial" font-size="52" fill="#111827">DEMO VEHICLE</text>
+</svg>

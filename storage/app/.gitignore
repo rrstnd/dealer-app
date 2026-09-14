@@ -1,4 +1,6 @@
 *
-!private/
-!public/
 !.gitignore
+
+!public/
+!public/vehicles/
+!public/vehicles/*.svg
