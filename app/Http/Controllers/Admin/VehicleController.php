@@ -43,7 +43,7 @@ class VehicleController extends Controller
 
        $vehicles = $query->latest()->paginate(10)->withQueryString();
 
-        return view('vehicles.index', compact('vehicles'));
+        return view('admin.vehicles.index', compact('vehicles'));
     }
 
     public function show(Vehicle $vehicle)
@@ -55,7 +55,7 @@ class VehicleController extends Controller
             'images',
         ]);
 
-        return view('vehicles.show', compact('vehicle'));
+        return view('admin.vehicles.show', compact('vehicle'));
     }
 
     public function destroy(Vehicle $vehicle)
@@ -73,7 +73,7 @@ class VehicleController extends Controller
         $brands = Brand::orderBy('name')->get();
         $models = VehicleModel::orderBy('name')->get();
 
-        return view('vehicles.create', compact(
+        return view('admin.vehicles.create', compact(
             'vehicleTypes',
             'brands',
             'models'
@@ -118,7 +118,7 @@ class VehicleController extends Controller
         $brands = Brand::orderBy('name')->get();
         $models = VehicleModel::orderBy('name')->get();
 
-        return view('vehicles.edit', compact(
+        return view('admin.vehicles.edit', compact(
             'vehicle',
             'vehicleTypes',
             'brands',

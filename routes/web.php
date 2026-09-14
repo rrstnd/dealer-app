@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\VehicleImageController;
-
+use App\Http\Controllers\Admin\SaleController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\VehicleController as WebsiteVehicleController;
 
@@ -95,4 +95,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])
         ->name('customers.destroy');
+
+    // Sales
+    Route::get('/sales', [SaleController::class, 'index'])
+    ->name('sales.index');
+
+    Route::get('/sales/create', [SaleController::class, 'create'])
+        ->name('sales.create');
+
+    Route::post('/sales', [SaleController::class, 'store'])
+        ->name('sales.store');
+
+    Route::get('/sales/{sale}/edit', [SaleController::class, 'edit'])
+        ->name('sales.edit');
+        
+    Route::get('/sales/{sale}', [SaleController::class, 'show'])
+        ->name('sales.show');
+
+    Route::put('/sales/{sale}', [SaleController::class, 'update'])
+        ->name('sales.update');
+
+    Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel'])
+        ->name('sales.cancel');
 });

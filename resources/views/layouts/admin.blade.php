@@ -14,7 +14,7 @@
     <div class="min-h-screen flex">
 
         {{-- SIDEBAR --}}
-        <aside class="w-64 bg-slate-900 text-white flex flex-col">
+        <aside class="w-64 min-w-64 shrink-0 bg-slate-900 text-white flex flex-col">
 
             {{-- Logo --}}
             <div class="h-16 flex items-center px-6 border-b border-slate-700">
@@ -45,10 +45,10 @@
                         <span>Customer</span>
                 </a>
 
-                <a href="#"
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
-                    <span>💵</span>
-                    <span>Keuangan</span>
+                <a href="{{ route('admin.sales.index') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
+                        <span>💵</span>
+                        <span>Keuangan</span>
                 </a>
 
                 <a href="#"

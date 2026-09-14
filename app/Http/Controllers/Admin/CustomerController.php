@@ -30,12 +30,12 @@ class CustomerController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('customers.index', compact('customers'));
+        return view('admin.customers.index', compact('customers'));
     }
 
     public function create(): View
     {
-        return view('customers.create');
+        return view('admin.customers.create');
     }
 
     public function store(Request $request)
@@ -62,12 +62,12 @@ class CustomerController extends Controller
 
     public function show(Customer $customer): View
     {
-        return view('customers.show', compact('customer'));
+        return view('admin.customers.show', compact('customer'));
     }
 
     public function edit(Customer $customer): View
     {
-        return view('customers.edit', compact('customer'));
+        return view('admin.customers.edit', compact('customer'));
     }
 
     public function update(Request $request, Customer $customer)
