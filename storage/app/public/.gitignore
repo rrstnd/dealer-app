@@ -1,2 +1,10 @@
-*
-!.gitignore
+/storage/app/public/*
+
+!/storage/app/public/vehicles/
+!/storage/app/public/vehicles/*.svg
+!/storage/app/public/vehicles/*.jpg
+!/storage/app/public/vehicles/*.jpeg
+!/storage/app/public/vehicles/*.png
+!/storage/app/public/vehicles/*.webp
+
+/public/storage/
