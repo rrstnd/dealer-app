@@ -82,6 +82,14 @@
                     <div>
                         <p class="text-sm font-semibold">Administrator</p>
                         <p class="text-xs text-slate-400">SUPER ADMIN</p>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+
+                            <button type="submit"
+                                class="text-sm text-red-600 hover:text-red-800">
+                                Logout
+                            </button>
+                        </form>
                     </div>
 
                 </div>

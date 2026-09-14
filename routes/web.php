@@ -34,7 +34,10 @@ Route::get('/vehicles/{vehicle}', [WebsiteVehicleController::class, 'show'])
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware('auth')
+    ->group(function () {
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])
@@ -122,3 +125,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports', [ReportController::class, 'sales'])
     ->name('reports.sales');
 });
+
+require __DIR__.'/auth.php';
