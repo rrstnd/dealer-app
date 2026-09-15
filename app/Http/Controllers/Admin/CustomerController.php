@@ -30,26 +30,27 @@ class CustomerController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('customers.index', compact('customers'));
+        return view('admin.customers.index', compact('customers'));
     }
 
     public function create(): View
     {
-        return view('customers.create');
+        return view('admin.customers.create');
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'customer_code' => 'required|string|max:30|unique:customers,customer_code',
-            'name'          => 'required|string|max:100',
-            'nik'           => 'nullable|string|max:30|unique:customers,nik',
-            'phone'         => 'required|string|max:30',
-            'email'         => 'nullable|email|max:255',
-            'address'       => 'nullable|string',
-            'city'          => 'nullable|string|max:100',
-            'province'      => 'nullable|string|max:100',
-            'notes'         => 'nullable|string',
+            'name' => 'required|string|max:100',
+            'nik' => 'nullable|string|max:30|unique:customers,nik',
+            'phone' => 'required|string|max:30',
+            'email' => 'nullable|email|max:255',
+
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'notes' => 'nullable|string',
         ]);
 
         Customer::create($validated);
@@ -61,26 +62,27 @@ class CustomerController extends Controller
 
     public function show(Customer $customer): View
     {
-        return view('customers.show', compact('customer'));
+        return view('admin.customers.show', compact('customer'));
     }
 
     public function edit(Customer $customer): View
     {
-        return view('customers.edit', compact('customer'));
+        return view('admin.customers.edit', compact('customer'));
     }
 
     public function update(Request $request, Customer $customer)
     {
         $validated = $request->validate([
             'customer_code' => 'required|string|max:30|unique:customers,customer_code,' . $customer->id,
-            'name'          => 'required|string|max:100',
-            'nik'           => 'nullable|string|max:30|unique:customers,nik,' . $customer->id,
-            'phone'         => 'required|string|max:30',
-            'email'         => 'nullable|email|max:255',
-            'address'       => 'nullable|string',
-            'city'          => 'nullable|string|max:100',
-            'province'      => 'nullable|string|max:100',
-            'notes'         => 'nullable|string',
+            'name' => 'required|string|max:100',
+            'nik' => 'nullable|string|max:30|unique:customers,nik,' . $customer->id,
+            'phone' => 'required|string|max:30',
+            'email' => 'nullable|email|max:255',
+
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'notes' => 'nullable|string',
         ]);
 
         $customer->update($validated);

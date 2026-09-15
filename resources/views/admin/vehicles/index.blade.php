@@ -1,18 +1,10 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('title', 'Inventory')
 
-    <title>Inventory Kendaraan</title>
+@section('page-title', 'Inventory')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-
-<body class="bg-slate-100 text-slate-800">
-
-    <div class="max-w-7xl mx-auto px-6 py-8">
+@section('content')
 
         {{-- HEADER --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -40,13 +32,19 @@
         </div>
 
 
-        {{-- SUCCESS MESSAGE --}}
+        {{-- SUCCESS / ERROR MESSAGE --}}
         @if (session('success'))
 
             <div class="mb-6 px-4 py-3 rounded-lg bg-green-100 border border-green-200 text-green-700">
                 {{ session('success') }}
             </div>
 
+        @endif
+
+        @if (session('error'))
+            <div class="mb-4 rounded-lg bg-red-100 px-4 py-3 text-sm text-red-700">
+                {{ session('error') }}
+            </div>
         @endif
 
 
@@ -408,16 +406,4 @@
 
     </div>
 
-</body>
-</html>
-
-        </div>
-
-    </div>
-
-</body>
-
-</html>
-
-
-
+@endsection
