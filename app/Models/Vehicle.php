@@ -5,9 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * Model Data Utama Kendaraan (Mobil & Motor).
+ * Mengelola informasi atribut fisik, spesifikasi teknis, harga, status inventaris, dan galeri foto.
+ */
 class Vehicle extends Model
 {
+    /**
+     * Kolom tabel yang dapat diisi secara massal (Mass Assignment).
+     */
     protected $fillable = [
         'stock_code',
         'vehicle_type_id',
@@ -30,33 +38,44 @@ class Vehicle extends Model
         'description',
     ];
 
+    /**
+     * Relasi ke Tipe Kendaraan (Mobil / Motor).
+     */
     public function vehicleType(): BelongsTo
     {
         return $this->belongsTo(VehicleType::class);
     }
 
+    /**
+     * Relasi ke Merek / Brand (Toyota, Honda, Yamaha, dll.).
+     */
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
     }
 
+    /**
+     * Relasi ke Model Kendaraan (Avanza, Brio, NMAX, dll.).
+     */
     public function model(): BelongsTo
     {
-        return $this->belongsTo(
-            VehicleModel::class,
-            'model_id'
-        );
+        return $this->belongsTo(VehicleModel::class, 'model_id');
     }
 
+    /**
+     * Relasi ke Galeri Foto Kendaraan (Banyak Foto).
+     */
     public function images(): HasMany
     {
-        return $this->hasMany(VehicleImage::class)
-            ->orderBy('sort_order');
+        return $this->hasMany(VehicleImage::class)->orderBy('sort_order');
     }
 
-    public function primaryImage()
+    /**
+     * Relasi ke Foto Utama Kendaraan (1 Foto Primary).
+     */
+    public function primaryImage(): HasOne
     {
-        return $this->hasOne(VehicleImage::class)
-            ->where('is_primary', true);
+        return $this->hasOne(VehicleImage::class)->where('is_primary', true);
     }
 }
+

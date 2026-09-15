@@ -4,15 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\VehicleModel;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
+/**
+ * Controller AJAX Master Data Model Kendaraan.
+ */
 class VehicleModelController extends Controller
 {
     /**
-     * Search vehicle models by brand.
+     * Pencarian model kendaraan spesifik berdasarkan brand_id via AJAX.
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'brand_id' => [
@@ -41,9 +47,12 @@ class VehicleModelController extends Controller
     }
 
     /**
-     * Create new vehicle model.
+     * Menambahkan model kendaraan baru untuk brand tertentu secara dinamis via AJAX.
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'brand_id' => [
@@ -57,6 +66,7 @@ class VehicleModelController extends Controller
             ],
         ]);
 
+        // Cek duplikasi model pada brand yang sama (case-insensitive)
         $exists = VehicleModel::where('brand_id', $validated['brand_id'])
             ->whereRaw('LOWER(name) = ?', [strtolower($validated['name'])])
             ->exists();

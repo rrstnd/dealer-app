@@ -38,9 +38,9 @@
                 {{-- NAV LINKS --}}
                 <nav class="hidden md:flex items-center gap-6">
                     <a href="{{ route('home') }}" class="text-sm font-semibold text-slate-900 hover:text-blue-600 transition">Beranda</a>
-                    <a href="{{ route('vehicles.index', ['vehicle_type_id' => 1]) }}" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition">Katalog Mobil</a>
-                    <a href="{{ route('vehicles.index', ['vehicle_type_id' => 2]) }}" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition">Katalog Motor</a>
-                    <a href="#features" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition">Keunggulan</a>
+                    <a href="{{ route('vehicles.index', ['vehicle_type_id' => 1]) }}" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition">Mobil</a>
+                    <a href="{{ route('vehicles.index', ['vehicle_type_id' => 2]) }}" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition">Motor</a>
+                    <a href="#features" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition">Tentang Kami</a>
                     <a href="#location" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition">Lokasi</a>
                 </nav>
 
@@ -53,7 +53,7 @@
                         </svg>
                         Portal Admin
                     </a>
-                    <a href="https://wa.me/6281234567890" target="_blank"
+                    <a href="https://wa.me/6281511424262" target="_blank"
                        class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 transition active:scale-[0.98]">
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
@@ -83,7 +83,7 @@
                 </h1>
 
                 <p class="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
-                    Mobil & Motor siap pakai, Liburan langsung Gas!!! Transaksi aman, legalitas terjamin, & harga bisa di nego.
+                    Mobil & Motor siap pakai, Liburan langsung Gas!!! Transaksi aman, legalitas terjamin & harga bisa di nego.
                 </p>
             </div>
 
@@ -219,34 +219,166 @@
         </div>
     </section>
 
-    {{-- WHY CHOOSE US --}}
-    <section id="features" class="py-20 bg-white border-t border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16">
-                <span class="text-xs font-extrabold text-blue-600 uppercase tracking-widest">Keunggulan Kami</span>
-                <h2 class="text-3xl font-black text-slate-900 tracking-tight mt-1">Mengapa Memilih Suja MobilIndo?</h2>
-                <p class="text-sm text-slate-500 mt-2">Komitmen kami memberikan pengalaman beli mobil bekas terlengkap & paling transparan.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200/80 hover:border-blue-300 transition">
-                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-xl mb-6">🛡️</div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-2">Garansi Mesin & Transmisi</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Jaminan garansi komprehensif hingga 1 tahun untuk ketenangan berkendara Anda dan keluarga.</p>
-                </div>
-
-                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200/80 hover:border-blue-300 transition">
-                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center font-bold text-xl mb-6">📋</div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-2">Bebas Kecelakaan & Banjir</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Seluruh armada telah lulus uji sertifikasi independen tanpa bekas benturan struktur rangka utama.</p>
-                </div>
-
-                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200/80 hover:border-blue-300 transition">
-                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center font-bold text-xl mb-6">💳</div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-2">Proses Aman & Transparan</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Seluruh transaksi diproses secara profesional dengan jaminan kelengkapan dokumen sah 100%.</p>
+    {{-- TENTANG KAMI SECTION --}}
+    <section id="features" class="py-24 bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            
+            {{-- HEADER TENTANG KAMI --}}
+            <div class="text-center max-w-3xl mx-auto space-y-4">
+                <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-extrabold uppercase tracking-widest">
+                    Tentang Kami
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                    Suja Mobilindo
+                </h2>
+                <p class="text-base sm:text-lg font-bold text-blue-600">
+                    Temukan kendaraan pilihan yang sesuai dengan kebutuhan dan gaya hidup Anda.
+                </p>
+                <div class="text-sm text-slate-600 leading-relaxed space-y-3 pt-2">
+                    <p>
+                        Suja Mobilindo adalah showroom kendaraan yang menyediakan berbagai pilihan <strong class="text-slate-900 font-semibold">mobil dan motor</strong> dengan mengutamakan kualitas, kondisi kendaraan, serta pelayanan yang terpercaya.
+                    </p>
+                    <p>
+                        Kami hadir untuk membantu pelanggan menemukan kendaraan yang tepat dengan proses yang mudah, transparan, dan nyaman.
+                    </p>
                 </div>
             </div>
+
+            {{-- PILIHAN KENDARAAN SECTION --}}
+            <div class="bg-slate-50 border border-slate-200/80 rounded-3xl p-8 sm:p-10 space-y-8 shadow-xs">
+                <div class="text-center max-w-xl mx-auto">
+                    <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight">Pilihan Kendaraan</h3>
+                    <p class="text-xs text-slate-500 mt-1">Kami menyediakan berbagai tipe kendaraan terbaik sesuai kebutuhan Anda</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {{-- MOBIL CARD --}}
+                    <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+                        <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">
+                                🚗
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-extrabold text-slate-900">Pilihan Mobil</h4>
+                                <p class="text-xs text-slate-400">Armada roda empat berkualitas</p>
+                            </div>
+                        </div>
+                        <ul class="grid grid-cols-2 gap-3 text-xs font-semibold text-slate-700">
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-blue-600">✓</span> Mobil Keluarga
+                            </li>
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-blue-600">✓</span> City Car
+                            </li>
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-blue-600">✓</span> Sedan
+                            </li>
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-blue-600">✓</span> SUV
+                            </li>
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-blue-600">✓</span> MPV
+                            </li>
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-blue-600">✓</span> Mobil Niaga
+                            </li>
+                        </ul>
+                    </div>
+
+                    {{-- MOTOR CARD --}}
+                    <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+                        <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                                🏍️
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-extrabold text-slate-900">Pilihan Motor</h4>
+                                <p class="text-xs text-slate-400">Armada roda dua pilihan</p>
+                            </div>
+                        </div>
+                        <ul class="grid grid-cols-2 gap-3 text-xs font-semibold text-slate-700">
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-indigo-600">✓</span> Motor Matic
+                            </li>
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-indigo-600">✓</span> Motor Bebek
+                            </li>
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-indigo-600">✓</span> Motor Sport
+                            </li>
+                            <li class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-indigo-600">✓</span> Kebutuhan Harian
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p class="text-xs text-center text-slate-500 max-w-2xl mx-auto pt-2 leading-relaxed">
+                    Setiap kendaraan yang tersedia akan dilengkapi dengan informasi mengenai <strong class="text-slate-800">spesifikasi, kondisi, harga, foto, dan status kendaraan</strong>, sehingga pelanggan dapat melihat informasi dengan lebih mudah sebelum melakukan pembelian.
+                </p>
+            </div>
+
+            {{-- MENGAPA MEMILIH SUJA MOBILINDO? --}}
+            <div class="space-y-10">
+                <div class="text-center max-w-xl mx-auto">
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Mengapa Memilih Suja Mobilindo?</h3>
+                    <p class="text-xs text-slate-500 mt-1">Alasan utama kepercayaan pelanggan pada showroom kami</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {{-- ITEM 1 --}}
+                    <div class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-blue-500 transition duration-200 space-y-3">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold text-lg">🚘</div>
+                        <h4 class="text-base font-bold text-slate-900">Pilihan Kendaraan Beragam</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">Berbagai jenis mobil dan motor tersedia untuk memenuhi kebutuhan pelanggan.</p>
+                    </div>
+
+                    {{-- ITEM 2 --}}
+                    <div class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-blue-500 transition duration-200 space-y-3">
+                        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-bold text-lg">📄</div>
+                        <h4 class="text-base font-bold text-slate-900">Informasi Transparan</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">Kami memberikan informasi kendaraan secara jelas, mulai dari spesifikasi hingga kondisi kendaraan.</p>
+                    </div>
+
+                    {{-- ITEM 3 --}}
+                    <div class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-blue-500 transition duration-200 space-y-3">
+                        <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center font-bold text-lg">🏷️</div>
+                        <h4 class="text-base font-bold text-slate-900">Harga Kompetitif</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">Kami berusaha memberikan harga yang sesuai dengan kondisi dan kualitas kendaraan.</p>
+                    </div>
+
+                    {{-- ITEM 4 --}}
+                    <div class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-blue-500 transition duration-200 space-y-3">
+                        <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center font-bold text-lg">🤝</div>
+                        <h4 class="text-base font-bold text-slate-900">Pelayanan Ramah</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">Tim kami siap membantu pelanggan dalam mencari dan memilih kendaraan yang sesuai.</p>
+                    </div>
+
+                    {{-- ITEM 5 --}}
+                    <div class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-blue-500 transition duration-200 space-y-3 sm:col-span-2 lg:col-span-1">
+                        <div class="w-10 h-10 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center font-bold text-lg">⚡</div>
+                        <h4 class="text-base font-bold text-slate-900">Proses Mudah</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">Nikmati proses pencarian kendaraan yang lebih praktis dan nyaman.</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- KOMITMEN KAMI (BANNER) --}}
+            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-8 sm:p-12 rounded-3xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-8 text-center sm:text-left relative overflow-hidden">
+                <div class="space-y-3 max-w-2xl relative z-10">
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-widest">Komitmen Kami</span>
+                    <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight">Kepuasan dan Kepercayaan Pelanggan Adalah Prioritas Utama</h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        Kami berkomitmen untuk memberikan pelayanan terbaik serta membantu setiap pelanggan mendapatkan kendaraan yang sesuai dengan kebutuhan dan budget mereka.
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 shrink-0 text-center relative z-10">
+                    <span class="text-lg font-black text-white block">Suja Mobilindo</span>
+                    <span class="text-xs text-blue-300 italic block mt-1">"Pilihan kendaraan Anda, kepercayaan kami."</span>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -269,7 +401,7 @@
                             </div>
                             <div>
                                 <h3 class="text-base font-extrabold text-slate-900">Showroom Suja MobilIndo</h3>
-                                <p class="text-xs text-slate-500 font-mono mt-0.5">7°02'37.7"S 107°57'06.1"E</p>
+                                <p class="text-xs text-slate-500 font-mono mt-0.5">Kp.Cilanggir, Cigagade, Balubur Limbangan, Garut, Jawa Barat</p>
                             </div>
                         </div>
 

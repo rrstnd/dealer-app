@@ -76,27 +76,100 @@
             {{-- LEFT 2 COLS: PHOTO GALLERY & DESKRIPSI --}}
             <div class="lg:col-span-2 space-y-10">
                 
-                {{-- PHOTO GALLERY SHOWCASE --}}
-                <div class="space-y-4">
-                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <span>📷</span> Galeri Foto Unit
-                    </h2>
+                {{-- PHOTO GALLERY SHOWCASE WITH INTERACTIVE SLIDER --}}
+                @php
+                    $imageList = $vehicle->images->map(function($img) {
+                        return asset('storage/' . $img->image_path);
+                    })->values()->toArray();
 
-                    @if ($vehicle->images->count() > 0)
-                        {{-- PRIMARY IMAGE --}}
-                        <div class="aspect-[16/9] bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-lg">
-                            <img id="main-preview" src="{{ asset('storage/' . ($vehicle->primaryImage ? $vehicle->primaryImage->image_path : $vehicle->images->first()->image_path)) }}"
-                                 alt="Preview Mobil" class="w-full h-full object-cover">
+                    $primaryIdx = 0;
+                    if ($vehicle->primaryImage) {
+                        $primaryPath = asset('storage/' . $vehicle->primaryImage->image_path);
+                        $findIdx = array_search($primaryPath, $imageList);
+                        if ($findIdx !== false) {
+                            $primaryIdx = $findIdx;
+                        }
+                    }
+                @endphp
+
+                <div class="space-y-4"
+                     x-data="{
+                        activeIndex: {{ $primaryIdx }},
+                        images: {{ json_encode($imageList) }},
+                        next() {
+                            if (this.images.length > 0) {
+                                this.activeIndex = (this.activeIndex + 1) % this.images.length;
+                            }
+                        },
+                        prev() {
+                            if (this.images.length > 0) {
+                                this.activeIndex = (this.activeIndex - 1 + this.images.length) % this.images.length;
+                            }
+                        }
+                     }"
+                     @keydown.window.left="prev()"
+                     @keydown.window.right="next()">
+                    
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <span>📷</span> Galeri Foto Unit
+                        </h2>
+                    </div>
+
+                    @if (count($imageList) > 0)
+                        {{-- HERO SLIDER PREVIEW --}}
+                        <div class="relative aspect-[16/9] bg-slate-900 rounded-3xl overflow-hidden border border-slate-200/80 shadow-xl group">
+                            
+                            {{-- MAIN DISPLAY IMAGE --}}
+                            <template x-for="(img, idx) in images" :key="idx">
+                                <img :src="img" 
+                                     alt="{{ $vehicle->brand->name }} {{ $vehicle->model->name }}" 
+                                     x-show="activeIndex === idx"
+                                     x-transition:enter="transition ease-out duration-300"
+                                     x-transition:enter-start="opacity-0 scale-98"
+                                     x-transition:enter-end="opacity-100 scale-100"
+                                     class="w-full h-full object-cover select-none">
+                            </template>
+
+                            {{-- PREVIOUS BUTTON (<) --}}
+                            <button @click="prev()" 
+                                    x-show="images.length > 1" 
+                                    type="button"
+                                    class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-2xl bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur-md transition-all opacity-80 group-hover:opacity-100 hover:scale-110 active:scale-95 shadow-lg border border-white/20 cursor-pointer z-10"
+                                    title="Foto Sebelumnya (Panah Kiri)">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+
+                            {{-- NEXT BUTTON (>) --}}
+                            <button @click="next()" 
+                                    x-show="images.length > 1" 
+                                    type="button"
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-2xl bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur-md transition-all opacity-80 group-hover:opacity-100 hover:scale-110 active:scale-95 shadow-lg border border-white/20 cursor-pointer z-10"
+                                    title="Foto Berikutnya (Panah Kanan)">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+
+                            {{-- COUNTER OVERLAY BADGE --}}
+                            <div x-show="images.length > 1" 
+                                 class="absolute bottom-4 right-4 bg-slate-900/80 backdrop-blur-md text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl border border-white/20 shadow-md tracking-wider z-10">
+                                <span x-text="activeIndex + 1"></span> / <span x-text="images.length"></span>
+                            </div>
                         </div>
 
-                        {{-- THUMBNAILS --}}
+                        {{-- THUMBNAILS GRID WITH SELECTION HIGHLIGHT --}}
                         <div class="grid grid-cols-4 sm:grid-cols-6 gap-3">
-                            @foreach ($vehicle->images as $img)
-                                <button onclick="document.getElementById('main-preview').src = '{{ asset('storage/' . $img->image_path) }}'"
-                                        class="aspect-[16/10] bg-white rounded-xl overflow-hidden border border-slate-200 hover:border-blue-600 focus:border-blue-600 transition shadow-sm">
-                                    <img src="{{ asset('storage/' . $img->image_path) }}" alt="Thumbnail" class="w-full h-full object-cover">
+                            <template x-for="(img, idx) in images" :key="idx">
+                                <button type="button" 
+                                        @click="activeIndex = idx"
+                                        :class="activeIndex === idx ? 'border-blue-600 ring-2 ring-blue-600/30 scale-105 opacity-100' : 'border-slate-200/80 opacity-70 hover:opacity-100 hover:border-slate-400'"
+                                        class="aspect-[16/10] bg-white rounded-xl overflow-hidden border transition-all duration-200 cursor-pointer shadow-xs">
+                                    <img :src="img" alt="Thumbnail" class="w-full h-full object-cover">
                                 </button>
-                            @endforeach
+                            </template>
                         </div>
                     @else
                         <div class="aspect-[16/9] bg-white rounded-3xl border border-slate-200 flex flex-col items-center justify-center text-slate-400">
@@ -175,7 +248,7 @@
                         $waText = rawurlencode("Halo Suja MobilIndo Sales, saya tertarik dengan unit " . $vehicle->brand->name . " " . $vehicle->model->name . " (ID: " . $vehicle->stock_code . "). Apakah unit masih ready?");
                     @endphp
 
-                    <a href="https://wa.me/6281234567890?text={{ $waText }}" target="_blank"
+                    <a href="https://wa.me/6281511424262?text={{ $waText }}" target="_blank"
                        class="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-600/20 transition active:scale-[0.98]">
                         <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>

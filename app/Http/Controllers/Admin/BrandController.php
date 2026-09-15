@@ -4,14 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Controller AJAX Master Data Merek / Brand Kendaraan.
+ */
 class BrandController extends Controller
 {
     /**
-     * Search brands.
+     * Pencarian merek kendaraan via AJAX untuk autocompletion dropdown.
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
         $query = trim($request->get('q', ''));
 
@@ -27,9 +34,12 @@ class BrandController extends Controller
     }
 
     /**
-     * Create new brand.
+     * Menambahkan merek kendaraan baru secara dinamis via AJAX.
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => [

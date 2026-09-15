@@ -11,8 +11,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
+/**
+ * Controller Manajerial Kendaraan (CRUD & Inventaris) Panel Admin.
+ */
 class VehicleController extends Controller
 {
+    /**
+     * Menampilkan daftar inventaris kendaraan untuk Admin dengan fitur filter & pencarian.
+     *
+     * @param Request $request
+     * @return View
+     */
     public function index(Request $request): View
     {
         $query = Vehicle::with([
@@ -21,7 +30,7 @@ class VehicleController extends Controller
             'model',
         ]);
 
-        // Search
+        // Filter Pencarian Teks (Kode Stok, Plat Nomor, Merek, atau Model)
         if ($request->filled('search')) {
             $search = $request->search;
 
@@ -37,7 +46,7 @@ class VehicleController extends Controller
             });
         }
 
-        // Filter Status
+        // Filter Status Kendaraan (AVAILABLE, RESERVED, SOLD, SERVICE, INACTIVE)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -50,7 +59,13 @@ class VehicleController extends Controller
         return view('admin.vehicles.index', compact('vehicles'));
     }
 
-    public function show(Vehicle $vehicle)
+    /**
+     * Menampilkan rincian detail kendaraan tertentu untuk Admin.
+     *
+     * @param Vehicle $vehicle
+     * @return View
+     */
+    public function show(Vehicle $vehicle): View
     {
         $vehicle->load([
             'brand',
@@ -62,6 +77,12 @@ class VehicleController extends Controller
         return view('admin.vehicles.show', compact('vehicle'));
     }
 
+    /**
+     * Menghapus data kendaraan (Hanya jika belum terjual / status bukan SOLD).
+     *
+     * @param Vehicle $vehicle
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Vehicle $vehicle)
     {
         if ($vehicle->status === 'SOLD') {
@@ -78,8 +99,10 @@ class VehicleController extends Controller
     }
 
     /**
-     * Generate Stock Code otomatis.
-     * Format: STK-0001, STK-0002, dst.
+     * Menghasilkan Kode Stok otomatis berikutnya.
+     * Format contoh: STK-0001, STK-0002, dst.
+     *
+     * @return string
      */
     private function generateNextStockCode(): string
     {
@@ -98,6 +121,11 @@ class VehicleController extends Controller
         );
     }
 
+    /**
+     * Menampilkan form tambah kendaraan baru.
+     *
+     * @return View
+     */
     public function create(): View
     {
         $nextStockCode = $this->generateNextStockCode();
