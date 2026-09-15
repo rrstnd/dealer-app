@@ -28,32 +28,47 @@
             <nav class="flex-1 px-4 py-6 space-y-2">
 
                 <a href="{{ route('admin.dashboard') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800">
-                    <span>🏠</span>
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                    {{ request()->routeIs('admin.dashboard')
+                            ? 'bg-slate-800 text-white shadow-sm'
+                            : 'hover:bg-slate-50' }}">
+                    <span>📊</span>
                     <span>Dashboard</span>
                 </a>
 
                 <a href="{{ route('admin.vehicles.index') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                    {{ request()->routeIs('admin.vehicles.*')
+                            ? 'bg-slate-800 text-white shadow-sm'
+                            : 'hover:bg-slate-50' }}">
                     <span>🚗</span>
                     <span>Inventory</span>
                 </a>
 
                 <a href="{{ route('admin.customers.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
-                        <span>👥</span>
-                        <span>Customer</span>
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                        {{ request()->routeIs('admin.customers.*')
+                                ? 'bg-slate-800 text-white shadow-sm'
+                                : 'hover:bg-slate-50' }}">
+                    <span>👥</span>
+                    <span>Customer</span>
                 </a>
 
                 <a href="{{ route('admin.sales.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
-                        <span>💵</span>
-                        <span>Keuangan</span>
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                    {{ request()->routeIs('admin.sales.*')
+                            ? 'bg-slate-800 text-white shadow-sm'  
+                            : 'hover:bg-slate-50' }}">
+                    <span>💰</span>
+                    <span>Keuangan</span>
                 </a>
 
                 <a href="{{ route('admin.reports.sales') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
-                    <span>📊</span>
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+                        {{ request()->routeIs('admin.reports.*')
+                                ? 'bg-slate-800 text-white shadow-sm'
+                                : 'hover:bg-slate-50' }}">
+                    <span>📈</span>
                     <span>Laporan</span>
                 </a>
 
@@ -117,18 +132,18 @@
                 <div class="flex items-center gap-4">
 
                     <button class="text-xl">
-                        🔔
+                        
                     </button>
 
-                    <div class="text-right">
-                        <p class="text-sm font-semibold">
-                            Administrator
-                        </p>
-
-                        <p class="text-xs text-slate-500">
-                            Super Admin
-                        </p>
-                    </div>
+                    <a
+                        href="{{ route('home') }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-slate-100 transition"
+                    >
+                        <div class="text-right">
+                            <div class="font-semibold text-slate-700">🌐 Website Public</div>
+                    </a>
 
                 </div>
 
