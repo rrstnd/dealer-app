@@ -81,8 +81,8 @@
 
                     <input
                         type="text"
-                        name="customer_code"
-                        value="{{ old('customer_code', $customer->customer_code) }}"
+                        name="{{ $customer->id }}"
+                        value="{{ old('id', $customer->id) }}"
                         required
                         class="w-full px-4 py-3 border border-slate-300
                                rounded-lg focus:ring-2 focus:ring-slate-400

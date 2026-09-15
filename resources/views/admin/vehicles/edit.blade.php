@@ -7,330 +7,393 @@
 </head>
 <body>
 
-<h1>Edit Kendaraan</h1>
+    <h1>Edit Kendaraan</h1>
 
-<a href="{{ route('admin.vehicles.index') }}">
-    ← Kembali ke Inventory
-</a>
-
-<hr>
-
-@if ($errors->any())
-    <div>
-        <strong>Terjadi kesalahan:</strong>
-
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
+    <a href="{{ route('admin.vehicles.index') }}">
+        ← Kembali ke Inventory
+    </a>
 
     <hr>
-@endif
 
-<form action="{{ route('admin.vehicles.update', $vehicle) }}" method="POST">
+    @if ($errors->any())
+        <div>
+            <strong>Terjadi kesalahan:</strong>
 
-    @csrf
-    @method('PUT')
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
 
-    <h3>Informasi Kendaraan</h3>
+        <hr>
+    @endif
 
-    <div>
-        <label>Stock Code</label><br>
-        <input
-            type="text"
-            name="stock_code"
-            value="{{ old('stock_code', $vehicle->stock_code) }}"
-            required
-        >
-    </div>
+    <form action="{{ route('admin.vehicles.update', $vehicle) }}" method="POST">
+        @csrf
+        @method('PUT')
 
-    <br>
+        <h3>Informasi Kendaraan</h3>
 
-    <div>
-        <label>Jenis Kendaraan</label><br>
+        {{-- Stock Code --}}
+        <div>
+            <label>Stock Code</label><br>
 
-        <select name="vehicle_type_id" required>
-            <option value="">-- Pilih Jenis --</option>
+            <input
+                type="text"
+                value="{{ $vehicle->stock_code }}"
+                readonly
+            >
 
-            @foreach ($vehicleTypes as $type)
-                <option
-                    value="{{ $type->id }}"
-                    {{ old('vehicle_type_id', $vehicle->vehicle_type_id) == $type->id ? 'selected' : '' }}
-                >
-                    {{ $type->name }}
+            <small>
+                Stock Code tidak dapat diubah.
+            </small>
+        </div>
+
+        <br>
+
+        {{-- Type --}}
+        <div>
+            <label>Jenis Kendaraan</label><br>
+
+            <input
+                type="text"
+                name="type"
+                value="{{ old('type', $vehicle->vehicleType?->name) }}"
+                placeholder="Contoh: Motor"
+                required
+            >
+
+            @error('type')
+                <div>{{ $message }}</div>
+            @enderror
+        </div>
+
+        <br>
+
+        {{-- Brand --}}
+        <div>
+            <label>Brand</label><br>
+
+            <input
+                type="text"
+                name="brand"
+                value="{{ old('brand', $vehicle->brand?->name) }}"
+                placeholder="Contoh: Honda"
+                required
+            >
+
+            @error('brand')
+                <div>{{ $message }}</div>
+            @enderror
+        </div>
+
+        <br>
+
+        {{-- Model --}}
+        <div>
+            <label>Model</label><br>
+
+            <input
+                type="text"
+                name="model"
+                value="{{ old('model', $vehicle->model?->name) }}"
+                placeholder="Contoh: Beat"
+                required
+            >
+
+            @error('model')
+                <div>{{ $message }}</div>
+            @enderror
+        </div>
+
+        <br>
+
+        {{-- Variant --}}
+        <div>
+            <label>Variant</label><br>
+
+            <input
+                type="text"
+                name="variant"
+                value="{{ old('variant', $vehicle->variant) }}"
+                placeholder="Contoh: 1.5 G"
+            >
+        </div>
+
+        <br>
+
+        {{-- Tahun --}}
+        <div>
+            <label>Tahun</label><br>
+
+            <input
+                type="number"
+                name="year"
+                value="{{ old('year', $vehicle->year) }}"
+                required
+            >
+
+            @error('year')
+                <div>{{ $message }}</div>
+            @enderror
+        </div>
+
+        <br>
+
+        {{-- Warna --}}
+        <div>
+            <label>Warna</label><br>
+
+            <input
+                type="text"
+                name="color"
+                value="{{ old('color', $vehicle->color) }}"
+                placeholder="Hitam"
+            >
+        </div>
+
+        <br>
+
+        {{-- Transmisi --}}
+        <div>
+            <label>Transmisi</label><br>
+
+            <select name="transmission">
+                <option value="">-- Pilih --</option>
+
+                <option value="Manual"
+                    {{ old('transmission', $vehicle->transmission) === 'Manual' ? 'selected' : '' }}>
+                    Manual
                 </option>
-            @endforeach
-        </select>
-    </div>
 
-    <br>
-
-    <div>
-        <label>Brand</label><br>
-
-        <select name="brand_id" required>
-            <option value="">-- Pilih Brand --</option>
-
-            @foreach ($brands as $brand)
-                <option
-                    value="{{ $brand->id }}"
-                    {{ old('brand_id', $vehicle->brand_id) == $brand->id ? 'selected' : '' }}
-                >
-                    {{ $brand->name }}
+                <option value="Automatic"
+                    {{ old('transmission', $vehicle->transmission) === 'Automatic' ? 'selected' : '' }}>
+                    Automatic
                 </option>
-            @endforeach
-        </select>
-    </div>
+            </select>
+        </div>
 
-    <br>
+        <br>
 
-    <div>
-        <label>Model</label><br>
+        {{-- Bahan Bakar --}}
+        <div>
+            <label>Bahan Bakar</label><br>
 
-        <select name="model_id" required>
-            <option value="">-- Pilih Model --</option>
+            <select name="fuel_type">
+                <option value="">-- Pilih --</option>
 
-            @foreach ($models as $model)
-                <option
-                    value="{{ $model->id }}"
-                    {{ old('model_id', $vehicle->model_id) == $model->id ? 'selected' : '' }}
-                >
-                    {{ $model->name }}
+                <option value="Bensin"
+                    {{ old('fuel_type', $vehicle->fuel_type) === 'Bensin' ? 'selected' : '' }}>
+                    Bensin
                 </option>
-            @endforeach
-        </select>
-    </div>
 
-    <br>
+                <option value="Diesel"
+                    {{ old('fuel_type', $vehicle->fuel_type) === 'Diesel' ? 'selected' : '' }}>
+                    Diesel
+                </option>
 
-    <div>
-        <label>Variant</label><br>
-        <input
-            type="text"
-            name="variant"
-            value="{{ old('variant', $vehicle->variant) }}"
-        >
-    </div>
+                <option value="Listrik"
+                    {{ old('fuel_type', $vehicle->fuel_type) === 'Listrik' ? 'selected' : '' }}>
+                    Listrik
+                </option>
 
-    <br>
+                <option value="Hybrid"
+                    {{ old('fuel_type', $vehicle->fuel_type) === 'Hybrid' ? 'selected' : '' }}>
+                    Hybrid
+                </option>
+            </select>
+        </div>
 
-    <div>
-        <label>Tahun</label><br>
-        <input
-            type="number"
-            name="year"
-            value="{{ old('year', $vehicle->year) }}"
-            required
-        >
-    </div>
+        <br>
 
-    <br>
+        {{-- Kapasitas Mesin --}}
+        <div>
+            <label>Kapasitas Mesin (cc)</label><br>
 
-    <div>
-        <label>Warna</label><br>
-        <input
-            type="text"
-            name="color"
-            value="{{ old('color', $vehicle->color) }}"
-        >
-    </div>
-
-    <br>
-
-    <div>
-        <label>Transmisi</label><br>
-
-        <select name="transmission">
-            <option value="">-- Pilih Transmisi --</option>
-
-            <option
-                value="Manual"
-                {{ old('transmission', $vehicle->transmission) == 'Manual' ? 'selected' : '' }}
+            <input
+                type="number"
+                name="engine_capacity"
+                value="{{ old('engine_capacity', $vehicle->engine_capacity) }}"
+                placeholder="1500"
             >
-                Manual
-            </option>
+        </div>
 
-            <option
-                value="Automatic"
-                {{ old('transmission', $vehicle->transmission) == 'Automatic' ? 'selected' : '' }}
+        <br>
+
+        {{-- Kilometer --}}
+        <div>
+            <label>Kilometer</label><br>
+
+            <input
+                type="number"
+                name="mileage"
+                value="{{ old('mileage', $vehicle->mileage) }}"
+                placeholder="45000"
             >
-                Automatic
-            </option>
-        </select>
-    </div>
+        </div>
 
-    <br>
+        <br>
 
-    <div>
-        <label>Bahan Bakar</label><br>
+        {{-- Plat Nomor --}}
+        <div>
+            <label>Plat Nomor</label><br>
 
-        <select name="fuel_type">
-            <option value="">-- Pilih Bahan Bakar --</option>
-
-            <option
-                value="Bensin"
-                {{ old('fuel_type', $vehicle->fuel_type) == 'Bensin' ? 'selected' : '' }}
+            <input
+                type="text"
+                name="license_plate"
+                value="{{ old('license_plate', $vehicle->license_plate) }}"
+                placeholder="B 1234 XYZ"
             >
-                Bensin
-            </option>
+        </div>
 
-            <option
-                value="Diesel"
-                {{ old('fuel_type', $vehicle->fuel_type) == 'Diesel' ? 'selected' : '' }}
+        <br>
+
+        {{-- Nomor Rangka --}}
+        <div>
+            <label>Nomor Rangka</label><br>
+
+            <input
+                type="text"
+                name="chassis_number"
+                value="{{ old('chassis_number', $vehicle->chassis_number) }}"
+                placeholder="Nomor rangka"
             >
-                Diesel
-            </option>
 
-            <option
-                value="Listrik"
-                {{ old('fuel_type', $vehicle->fuel_type) == 'Listrik' ? 'selected' : '' }}
+            @error('chassis_number')
+                <div>{{ $message }}</div>
+            @enderror
+        </div>
+
+        <br>
+
+        {{-- Nomor Mesin --}}
+        <div>
+            <label>Nomor Mesin</label><br>
+
+            <input
+                type="text"
+                name="engine_number"
+                value="{{ old('engine_number', $vehicle->engine_number) }}"
+                placeholder="Nomor mesin"
             >
-                Listrik
-            </option>
 
-            <option
-                value="Hybrid"
-                {{ old('fuel_type', $vehicle->fuel_type) == 'Hybrid' ? 'selected' : '' }}
+            @error('engine_number')
+                <div>{{ $message }}</div>
+            @enderror
+        </div>
+
+        <br>
+
+        {{-- Tahun Registrasi --}}
+        <div>
+            <label>Tahun Registrasi</label><br>
+
+            <input
+                type="number"
+                name="registration_year"
+                value="{{ old('registration_year', $vehicle->registration_year) }}"
+                placeholder="2024"
             >
-                Hybrid
-            </option>
-        </select>
-    </div>
 
-    <br>
+            @error('registration_year')
+                <div>{{ $message }}</div>
+            @enderror
+        </div>
 
-    <div>
-        <label>Kapasitas Mesin (cc)</label><br>
+        <br>
 
-        <input
-            type="number"
-            name="engine_capacity"
-            value="{{ old('engine_capacity', $vehicle->engine_capacity) }}"
-        >
-    </div>
+        <h3>Harga</h3>
 
-    <br>
+        {{-- Harga Beli --}}
+        <div>
+            <label>Harga Beli</label><br>
 
-    <div>
-        <label>Kilometer</label><br>
-
-        <input
-            type="number"
-            name="mileage"
-            value="{{ old('mileage', $vehicle->mileage) }}"
-        >
-    </div>
-
-    <br>
-
-    <div>
-        <label>Plat Nomor</label><br>
-
-        <input
-            type="text"
-            name="license_plate"
-            value="{{ old('license_plate', $vehicle->license_plate) }}"
-        >
-    </div>
-
-    <br>
-
-    <h3>Harga</h3>
-
-    <div>
-        <label>Harga Beli</label><br>
-
-        <input
-            type="number"
-            name="purchase_price"
-            value="{{ old('purchase_price', $vehicle->purchase_price) }}"
-            required
-        >
-    </div>
-
-    <br>
-
-    <div>
-        <label>Harga Jual</label><br>
-
-        <input
-            type="number"
-            name="selling_price"
-            value="{{ old('selling_price', $vehicle->selling_price) }}"
-            required
-        >
-    </div>
-
-    <br>
-
-    <h3>Status</h3>
-
-    <div>
-        <label>Status</label><br>
-
-        <select name="status" required>
-
-            <option
-                value="AVAILABLE"
-                {{ old('status', $vehicle->status) == 'AVAILABLE' ? 'selected' : '' }}
+            <input
+                type="number"
+                name="purchase_price"
+                value="{{ old('purchase_price', $vehicle->purchase_price) }}"
+                required
             >
-                AVAILABLE
-            </option>
 
-            <option
-                value="RESERVED"
-                {{ old('status', $vehicle->status) == 'RESERVED' ? 'selected' : '' }}
+            @error('purchase_price')
+                <div>{{ $message }}</div>
+            @enderror
+        </div>
+
+        <br>
+
+        {{-- Harga Jual --}}
+        <div>
+            <label>Harga Jual</label><br>
+
+            <input
+                type="number"
+                name="selling_price"
+                value="{{ old('selling_price', $vehicle->selling_price) }}"
+                required
             >
-                RESERVED
-            </option>
 
-            <option
-                value="SOLD"
-                {{ old('status', $vehicle->status) == 'SOLD' ? 'selected' : '' }}
-            >
-                SOLD
-            </option>
+            @error('selling_price')
+                <div>{{ $message }}</div>
+            @enderror
+        </div>
 
-            <option
-                value="SERVICE"
-                {{ old('status', $vehicle->status) == 'SERVICE' ? 'selected' : '' }}
-            >
-                SERVICE
-            </option>
+        <br>
 
-            <option
-                value="INACTIVE"
-                {{ old('status', $vehicle->status) == 'INACTIVE' ? 'selected' : '' }}
-            >
-                INACTIVE
-            </option>
+        {{-- Status --}}
+        <div>
+            <label>Status</label><br>
 
-        </select>
-    </div>
+            <select name="status" required>
+                <option value="AVAILABLE"
+                    {{ old('status', $vehicle->status) === 'AVAILABLE' ? 'selected' : '' }}>
+                    AVAILABLE
+                </option>
 
-    <br>
+                <option value="RESERVED"
+                    {{ old('status', $vehicle->status) === 'RESERVED' ? 'selected' : '' }}>
+                    RESERVED
+                </option>
 
-    <div>
-        <label>Deskripsi</label><br>
+                <option value="SOLD"
+                    {{ old('status', $vehicle->status) === 'SOLD' ? 'selected' : '' }}>
+                    SOLD
+                </option>
 
-        <textarea
-            name="description"
-            rows="5"
-        >{{ old('description', $vehicle->description) }}</textarea>
-    </div>
+                <option value="SERVICE"
+                    {{ old('status', $vehicle->status) === 'SERVICE' ? 'selected' : '' }}>
+                    SERVICE
+                </option>
 
-    <br>
+                <option value="INACTIVE"
+                    {{ old('status', $vehicle->status) === 'INACTIVE' ? 'selected' : '' }}>
+                    INACTIVE
+                </option>
+            </select>
+        </div>
 
-    <button type="submit">
-        Simpan Perubahan
-    </button>
+        <br>
 
-</form>
+        {{-- Deskripsi --}}
+        <div>
+            <label>Deskripsi</label><br>
+
+            <textarea
+                name="description"
+                rows="5"
+                cols="50"
+                placeholder="Deskripsi kendaraan..."
+            >{{ old('description', $vehicle->description) }}</textarea>
+        </div>
+
+        <br>
+
+        <button type="submit">
+            Update Kendaraan
+        </button>
+
+    </form>
 
 </body>
 </html>
-
-
-

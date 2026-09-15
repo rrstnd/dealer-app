@@ -10,6 +10,9 @@ use App\Http\Controllers\Admin\SaleController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\VehicleController as WebsiteVehicleController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\VehicleTypeController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\VehicleModelController;
 
 
 /*
@@ -65,7 +68,23 @@ Route::prefix('admin')
 
     Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])
         ->name('vehicles.destroy');
+    Route::get('/vehicle-types/search', [VehicleTypeController::class, 'search'])
+        ->name('vehicle-types.search');
 
+    Route::post('/vehicle-types', [VehicleTypeController::class, 'store'])
+        ->name('vehicle-types.store');
+
+    Route::get('/brands/search', [BrandController::class, 'search'])
+        ->name('brands.search');
+
+    Route::post('/brands', [BrandController::class, 'store'])
+        ->name('brands.store');
+
+    Route::get('/vehicle-models/search', [VehicleModelController::class, 'search'])
+        ->name('vehicle-models.search');
+
+    Route::post('/vehicle-models', [VehicleModelController::class, 'store'])
+        ->name('vehicle-models.store');
 
     // Vehicle Images
     Route::post('/vehicles/{vehicle}/images', [VehicleImageController::class, 'store'])

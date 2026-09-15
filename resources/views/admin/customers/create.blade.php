@@ -45,29 +45,6 @@
 
                 <div>
                     <label class="block text-sm font-medium mb-2">
-                        ID Customer
-                    </label>
-
-                    <input
-                        type="text"
-                        name="customer_code"
-                        value="{{ old('customer_code') }}"
-                        placeholder="Contoh: CUST-0001"
-                        class="w-full px-4 py-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-slate-400"
-                        required
-                    >
-
-                    @error('customer_code')
-                        <p class="text-sm text-red-600 mt-1">
-                            {{ $message }}
-                        </p>
-                    @enderror
-
-                </div>
-
-
-                <div>
-                    <label class="block text-sm font-medium mb-2">
                         Nama Lengkap
                     </label>
 
@@ -266,6 +243,3 @@
 </div>
 
 @endsection
-
-
-

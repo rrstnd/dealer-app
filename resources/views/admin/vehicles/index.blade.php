@@ -32,13 +32,19 @@
         </div>
 
 
-        {{-- SUCCESS MESSAGE --}}
+        {{-- SUCCESS / ERROR MESSAGE --}}
         @if (session('success'))
 
             <div class="mb-6 px-4 py-3 rounded-lg bg-green-100 border border-green-200 text-green-700">
                 {{ session('success') }}
             </div>
 
+        @endif
+
+        @if (session('error'))
+            <div class="mb-4 rounded-lg bg-red-100 px-4 py-3 text-sm text-red-700">
+                {{ session('error') }}
+            </div>
         @endif
 
 

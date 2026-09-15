@@ -18,7 +18,7 @@ class CustomerController extends Controller
             $search = $request->search;
 
             $query->where(function ($q) use ($search) {
-                $q->where('customer_code', 'like', "%{$search}%")
+                $q->where('id', 'like', "%{$search}%")
                     ->orWhere('name', 'like', "%{$search}%")
                     ->orWhere('nik', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%");
@@ -41,7 +41,6 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_code' => 'required|string|max:30|unique:customers,customer_code',
             'name' => 'required|string|max:100',
             'nik' => 'nullable|string|max:30|unique:customers,nik',
             'phone' => 'required|string|max:30',
@@ -73,7 +72,6 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $validated = $request->validate([
-            'customer_code' => 'required|string|max:30|unique:customers,customer_code,' . $customer->id,
             'name' => 'required|string|max:100',
             'nik' => 'nullable|string|max:30|unique:customers,nik,' . $customer->id,
             'phone' => 'required|string|max:30',
