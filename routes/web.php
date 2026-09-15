@@ -143,6 +143,9 @@ Route::prefix('admin')
     
     Route::get('/reports', [ReportController::class, 'sales'])
     ->name('reports.sales');
+
+    Route::get('/reports/sales/export', [ReportController::class, 'exportSales'])
+    ->name('reports.sales.export');
 });
 
 require __DIR__.'/auth.php';

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\SalesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -57,5 +59,33 @@ class ReportController extends Controller
             'totalRevenue',
             'totalDiscount'
         ));
+    }
+
+    public function exportSales(Request $request)
+    {
+        $request->validate([
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
+        ]);
+
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
+        $fileName = 'laporan-penjualan';
+
+        if ($dateFrom && $dateTo) {
+            $fileName .= "-{$dateFrom}-sampai-{$dateTo}";
+        } elseif ($dateFrom) {
+            $fileName .= "-mulai-{$dateFrom}";
+        } elseif ($dateTo) {
+            $fileName .= "-sampai-{$dateTo}";
+        }
+
+        $fileName .= '.xlsx';
+
+        return Excel::download(
+            new SalesExport($dateFrom, $dateTo),
+            $fileName
+        );
     }
 }

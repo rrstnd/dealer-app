@@ -54,6 +54,13 @@
                     Reset
                 </a>
 
+                <a
+                    href="{{ route('admin.reports.sales.export', request()->only(['date_from', 'date_to'])) }}"
+                    class="px-5 py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition"
+                >
+                    Export Excel
+                </a>
+
             </div>
 
         </form>
