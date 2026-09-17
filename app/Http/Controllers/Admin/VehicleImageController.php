@@ -11,12 +11,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Controller Manajerial Galeri Foto Kendaraan Panel Admin.
+ * Controller Pengelolaan Berkas Galeri Foto Kendaraan Panel Admin.
+ *
+ * Mengatur upload berkas gambar ke disk storage 'public', penetapan foto sampul utama (is_primary),
+ * penghapusan berkas fisik beserta data di database, dan penataan urutan tampilan.
  */
 class VehicleImageController extends Controller
 {
     /**
-     * Mengunggah dan menyimpan foto kendaraan baru ke disk 'public'.
+     * Mengunggah dan menyimpan foto baru untuk unit kendaraan tertentu.
+     * Foto pertama yang diunggah otomatis ditetapkan sebagai foto utama (is_primary = true).
      *
      * @param Request $request
      * @param Vehicle $vehicle
@@ -29,18 +33,18 @@ class VehicleImageController extends Controller
                 'required',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
-                'max:10240', // Maksimal 10MB
+                'max:10240', // Batas ukuran berkas maksimal 10MB
             ],
         ]);
 
         DB::transaction(function () use ($request, $vehicle) {
-            // Cek apakah kendaraan sudah memiliki foto sebelumnya
+            // Cek apakah unit kendaraan sudah memiliki foto sebelumnya
             $hasImages = $vehicle->images()->exists();
 
-            // Simpan file ke folder storage/app/public/vehicles
+            // Simpan berkas gambar fisik ke direktori storage/app/public/vehicles
             $path = $request->file('image')->store('vehicles', 'public');
 
-            // Jika belum ada foto, foto pertama yang diunggah otomatis dijadikan foto utama (is_primary = true)
+            // Jika belum ada foto sama sekali, foto pertama ini otomatis menjadi foto utama (primary)
             $vehicle->images()->create([
                 'image_path' => $path,
                 'is_primary' => !$hasImages,
@@ -48,11 +52,12 @@ class VehicleImageController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Foto kendaraan berhasil ditambahkan.');
+        return back()->with('success', 'Foto kendaraan berhasil diunggah dan ditambahkan ke galeri.');
     }
 
     /**
-     * Menghapus foto kendaraan dari database dan storage fisik.
+     * Menghapus foto dari galeri kendaraan, menghapus berkas fisik dari storage,
+     * serta mengalihkan status 'is_primary' ke foto berikutnya jika foto yang dihapus adalah foto utama.
      *
      * @param Vehicle $vehicle
      * @param VehicleImage $image
@@ -60,18 +65,18 @@ class VehicleImageController extends Controller
      */
     public function destroy(Vehicle $vehicle, VehicleImage $image): RedirectResponse
     {
-        // Pengecekan keamanan: pastikan foto memang milik unit kendaraan yang bersangkutan
+        // Validasi keamanan relasi: pastikan foto benar-benar milik kendaraan yang dimaksud
         abort_unless($image->vehicle_id === $vehicle->id, 404);
 
         $wasPrimary = $image->is_primary;
 
-        // Hapus file fisik di storage
+        // 1. Hapus berkas gambar fisik dari disk storage 'public'
         Storage::disk('public')->delete($image->image_path);
 
-        // Hapus record di database
+        // 2. Hapus data record foto dari database
         $image->delete();
 
-        // Jika foto yang dihapus adalah foto utama, jadikan foto berikutnya sebagai foto utama
+        // 3. Jika yang dihapus adalah foto utama, jadikan foto berikutnya yang ada sebagai foto utama baru
         if ($wasPrimary) {
             $newPrimary = $vehicle->images()->orderBy('sort_order')->first();
             if ($newPrimary) {
@@ -83,7 +88,7 @@ class VehicleImageController extends Controller
     }
 
     /**
-     * Mengubah salah satu foto galeri menjadi foto utama (Primary Image).
+     * Menetapkan salah satu foto galeri sebagai foto utama (Primary Image / Thumbnail Sampul).
      *
      * @param Vehicle $vehicle
      * @param VehicleImage $image
@@ -94,13 +99,13 @@ class VehicleImageController extends Controller
         abort_unless($image->vehicle_id === $vehicle->id, 404);
 
         DB::transaction(function () use ($vehicle, $image) {
-            // Reset seluruh status primary foto lain milik kendaraan ini
+            // Reset seluruh status foto lain milik unit ini menjadi non-primary
             $vehicle->images()->update(['is_primary' => false]);
 
-            // Set foto yang dipilih sebagai primary
+            // Set foto yang dipilih menjadi primary
             $image->update(['is_primary' => true]);
         });
 
-        return back()->with('success', 'Foto utama berhasil diubah.');
+        return back()->with('success', 'Foto utama kendaraan berhasil diperbarui.');
     }
 }

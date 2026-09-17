@@ -1,40 +1,36 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Customer - ' . $customer->name)
-@section('page-title', 'Customer Management')
+@section('title', 'Edit Customer: ' . $customer->name)
+@section('page-title', 'Data Pelanggan')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="max-w-4xl space-y-6">
 
-    {{-- HEADER & BREADCRUMB --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div>
-            <a href="{{ route('admin.customers.index') }}"
-               class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition mb-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                Kembali ke Daftar Customer
-            </a>
-            <h1 class="text-xl font-bold text-slate-900 tracking-tight">
-                Edit Data Customer
+    {{-- HEADER SECTION --}}
+    <div class="mb-6">
+        <a href="{{ route('admin.customers.index') }}"
+           class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-900 transition mb-2">
+            <span>←</span>
+            <span>Kembali ke Data Pelanggan</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <h1 class="text-xl sm:text-2xl font-light tracking-[0.15em] text-zinc-900 uppercase">
+                EDIT DATA CUSTOMER
             </h1>
-            <p class="text-xs font-medium text-slate-500 mt-0.5">
-                Perbarui informasi identitas, alamat, atau kontak milik {{ $customer->name }}
-            </p>
+            <span class="text-xs font-mono-code font-bold uppercase tracking-wider text-zinc-500 bg-zinc-200/80 px-2.5 py-1">
+                {{ $customer->customer_code }}
+            </span>
         </div>
+        <p class="text-xs text-zinc-500 mt-1">
+            Perbarui informasi identitas, alamat domisili, atau kontak milik {{ $customer->name }}.
+        </p>
     </div>
 
     {{-- ERROR ALERT --}}
     @if ($errors->any())
-        <div class="p-4 bg-rose-50 border border-rose-200/80 rounded-xl text-rose-800 text-xs space-y-1">
-            <div class="font-bold flex items-center gap-2">
-                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>Mohon perbaiki kesalahan berikut:</span>
-            </div>
-            <ul class="list-disc list-inside pl-6 space-y-0.5">
+        <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">
+            <div class="font-bold uppercase tracking-wider mb-1">Terdapat kesalahan pengisian:</div>
+            <ul class="list-disc list-inside space-y-0.5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -42,206 +38,153 @@
         </div>
     @endif
 
-    {{-- FORM CARD --}}
+    {{-- FORM CONTAINER (CARITA LUXURY DESIGN) --}}
     <form action="{{ route('admin.customers.update', $customer) }}" method="POST" class="space-y-6">
         @csrf
         @method('PUT')
 
         {{-- SECTION 1: IDENTITAS & KONTAK --}}
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 space-y-6">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div class="p-2 bg-blue-50 text-blue-600 rounded-xl">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="font-bold text-slate-900 text-base">Identitas & Informasi Utama</h2>
-                    <p class="text-xs text-slate-400">Data identitas resmi dan saluran komunikasi pelanggan</p>
-                </div>
+        <div class="bg-white border border-zinc-200 shadow-xs">
+            <div class="px-6 py-4 border-b border-zinc-100 flex items-center gap-2">
+                <span class="w-1.5 h-1.5 bg-[#881337]"></span>
+                <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-zinc-900">
+                    1. Identitas & Saluran Kontak
+                </h2>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {{-- KODE CUSTOMER --}}
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                        Kode Customer <span class="text-rose-500">*</span>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                        Kode Customer (Permanen)
                     </label>
-                    <input
-                        type="text"
-                        name="customer_code"
-                        value="{{ old('customer_code', $customer->customer_code) }}"
-                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl font-mono
-                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                               transition outline-none text-slate-800"
-                        required
-                    >
+                    <input type="text"
+                           value="{{ $customer->customer_code }}"
+                           readonly
+                           class="w-full px-3 py-2.5 bg-zinc-100 border border-zinc-300 text-zinc-600 text-xs font-mono-code font-bold cursor-not-allowed">
                 </div>
 
                 {{-- NAMA LENGKAP --}}
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                        Nama Lengkap <span class="text-rose-500">*</span>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                        Nama Lengkap (Sesuai KTP) <span class="text-rose-600">*</span>
                     </label>
-                    <input
-                        type="text"
-                        name="name"
-                        value="{{ old('name', $customer->name) }}"
-                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
-                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                               transition outline-none text-slate-800"
-                        required
-                    >
+                    <input type="text"
+                           name="name"
+                           value="{{ old('name', $customer->name) }}"
+                           required
+                           class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs focus:bg-white focus:border-zinc-900 focus:outline-none transition">
                 </div>
 
                 {{-- NIK --}}
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                        NIK (KTP)
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                        Nomor Induk Kependudukan (NIK)
                     </label>
-                    <input
-                        type="text"
-                        name="nik"
-                        value="{{ old('nik', $customer->nik) }}"
-                        maxlength="16"
-                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl font-mono
-                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                               transition outline-none text-slate-800"
-                    >
+                    <input type="text"
+                           name="nik"
+                           value="{{ old('nik', $customer->nik) }}"
+                           maxlength="16"
+                           class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs font-mono-code focus:bg-white focus:border-zinc-900 focus:outline-none transition">
                 </div>
 
                 {{-- NO HP --}}
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                        No. HP / WhatsApp <span class="text-rose-500">*</span>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                        No. HP / WhatsApp <span class="text-rose-600">*</span>
                     </label>
-                    <input
-                        type="text"
-                        name="phone"
-                        value="{{ old('phone', $customer->phone) }}"
-                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
-                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                               transition outline-none text-slate-800"
-                        required
-                    >
+                    <input type="text"
+                           name="phone"
+                           value="{{ old('phone', $customer->phone) }}"
+                           required
+                           class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs font-mono-code focus:bg-white focus:border-zinc-900 focus:outline-none transition">
                 </div>
 
                 {{-- EMAIL --}}
                 <div class="sm:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Alamat Email
                     </label>
-                    <input
-                        type="email"
-                        name="email"
-                        value="{{ old('email', $customer->email) }}"
-                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
-                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                               transition outline-none text-slate-800"
-                    >
+                    <input type="email"
+                           name="email"
+                           value="{{ old('email', $customer->email) }}"
+                           class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs focus:bg-white focus:border-zinc-900 focus:outline-none transition">
                 </div>
             </div>
         </div>
 
         {{-- SECTION 2: ALAMAT DOMISILI --}}
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 space-y-6">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="font-bold text-slate-900 text-base">Alamat Domisili</h2>
-                    <p class="text-xs text-slate-400">Lokasi tempat tinggal untuk pengiriman unit / STNK</p>
-                </div>
+        <div class="bg-white border border-zinc-200 shadow-xs">
+            <div class="px-6 py-4 border-b border-zinc-100 flex items-center gap-2">
+                <span class="w-1.5 h-1.5 bg-[#881337]"></span>
+                <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-zinc-900">
+                    2. Alamat Domisili & Pengiriman
+                </h2>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {{-- ALAMAT LENGKAP --}}
+            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div class="sm:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                        Alamat Lengkap (Jalan, RT/RW, Kecamatan)
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                        Alamat Lengkap (Jalan, RT/RW, Kelurahan, Kecamatan)
                     </label>
-                    <textarea
-                        name="address"
-                        rows="3"
-                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
-                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                               transition outline-none text-slate-800"
-                    >{{ old('address', $customer->address) }}</textarea>
+                    <textarea name="address"
+                              rows="3"
+                              class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs focus:bg-white focus:border-zinc-900 focus:outline-none transition">{{ old('address', $customer->address) }}</textarea>
                 </div>
 
-                {{-- KOTA --}}
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Kota / Kabupaten
                     </label>
-                    <input
-                        type="text"
-                        name="city"
-                        value="{{ old('city', $customer->city) }}"
-                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
-                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                               transition outline-none text-slate-800"
-                    >
+                    <input type="text"
+                           name="city"
+                           value="{{ old('city', $customer->city) }}"
+                           class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs focus:bg-white focus:border-zinc-900 focus:outline-none transition">
                 </div>
 
-                {{-- PROVINSI --}}
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Provinsi
                     </label>
-                    <input
-                        type="text"
-                        name="province"
-                        value="{{ old('province', $customer->province) }}"
-                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
-                               focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                               transition outline-none text-slate-800"
-                    >
+                    <input type="text"
+                           name="province"
+                           value="{{ old('province', $customer->province) }}"
+                           class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs focus:bg-white focus:border-zinc-900 focus:outline-none transition">
                 </div>
             </div>
         </div>
 
         {{-- SECTION 3: CATATAN --}}
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 space-y-4">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div class="p-2 bg-amber-50 text-amber-600 rounded-xl">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="font-bold text-slate-900 text-base">Catatan Tambahan</h2>
-                    <p class="text-xs text-slate-400">Preferensi khusus, catatan leasing, atau preferensi unit</p>
-                </div>
+        <div class="bg-white border border-zinc-200 shadow-xs">
+            <div class="px-6 py-4 border-b border-zinc-100 flex items-center gap-2">
+                <span class="w-1.5 h-1.5 bg-[#881337]"></span>
+                <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-zinc-900">
+                    3. Catatan Khusus Pelanggan
+                </h2>
             </div>
 
-            <textarea
-                name="notes"
-                rows="3"
-                class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl
-                       focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                       transition outline-none text-slate-800"
-            >{{ old('notes', $customer->notes) }}</textarea>
+            <div class="p-6">
+                <textarea name="notes"
+                          rows="3"
+                          placeholder="Tuliskan catatan tambahan mengenai preferensi unit, leasing, atau riwayat kontak..."
+                          class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs focus:bg-white focus:border-zinc-900 focus:outline-none transition">{{ old('notes', $customer->notes) }}</textarea>
+            </div>
         </div>
 
         {{-- ACTION BUTTONS --}}
-        <div class="flex items-center justify-end gap-3 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-            <a href="{{ route('admin.customers.show', $customer) }}"
-               class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-semibold rounded-xl transition">
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="{{ route('admin.customers.index') }}"
+               class="px-5 py-2.5 border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-bold uppercase tracking-wider transition">
                 Batal
             </a>
+
             <button type="submit"
-                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-blue-500/20 transition active:scale-[0.98]">
-                Perbarui Customer
+                    class="px-6 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition shadow-xs flex items-center gap-2">
+                <span>Perbarui Data Customer</span>
+                <span>→</span>
             </button>
         </div>
+
     </form>
 </div>
 @endsection
-
-
-

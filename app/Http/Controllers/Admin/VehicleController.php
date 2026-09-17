@@ -7,30 +7,35 @@ use App\Models\Brand;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
 use App\Models\VehicleType;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
- * Controller Manajerial Kendaraan (CRUD & Inventaris) Panel Admin.
+ * Controller Pengelolaan Inventaris Kendaraan (CRUD & Manajemen Stok) Panel Admin.
+ *
+ * Mengatur pencarian inventaris, penambahan unit baru dengan pembuatan master data dinamis
+ * (Tipe, Brand, Model), pembaruan data teknis/spesifikasi, penghapusan unit, dan detail unit.
  */
 class VehicleController extends Controller
 {
     /**
-     * Menampilkan daftar inventaris kendaraan untuk Admin dengan fitur filter & pencarian.
+     * Menampilkan daftar inventaris kendaraan showroom dengan filter pencarian dan status.
      *
      * @param Request $request
      * @return View
      */
     public function index(Request $request): View
     {
+        // Inisialisasi eager loading relasi untuk efisiensi kueri database (mencegah N+1 problem)
         $query = Vehicle::with([
             'vehicleType',
             'brand',
             'model',
         ]);
 
-        // Filter Pencarian Teks (Kode Stok, Plat Nomor, Merek, atau Model)
+        // Filter Pencarian Bebas: Kode Stok, Plat Nomor, Nama Brand, atau Nama Model
         if ($request->filled('search')) {
             $search = $request->search;
 
@@ -46,11 +51,12 @@ class VehicleController extends Controller
             });
         }
 
-        // Filter Status Kendaraan (AVAILABLE, RESERVED, SOLD, SERVICE, INACTIVE)
+        // Filter Berdasarkan Status Inventaris (AVAILABLE, RESERVED, SOLD, SERVICE, INACTIVE)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        // Ambil data terbaru dengan paginasi 10 item dan sertakan parameter URL filter
         $vehicles = $query
             ->latest()
             ->paginate(10)
@@ -60,7 +66,129 @@ class VehicleController extends Controller
     }
 
     /**
-     * Menampilkan rincian detail kendaraan tertentu untuk Admin.
+     * Menampilkan formulir pendaftaran unit kendaraan baru ke dalam inventaris.
+     *
+     * @return View
+     */
+    public function create(): View
+    {
+        // Dapatkan usulan nomor kode stok otomatis berikutnya
+        $nextStockCode = $this->generateNextStockCode();
+
+        return view('admin.vehicles.create', compact('nextStockCode'));
+    }
+
+    /**
+     * Menyimpan data kendaraan baru ke database.
+     *
+     * Catatan Pengembangan:
+     * Input Brand, Tipe, dan Model berupa teks bebas. Sistem akan mencari kecocokan nama
+     * (case-insensitive) di database. Jika belum ada, sistem akan membuat master data baru secara dinamis
+     * di dalam Database Transaction agar konsistensi relasi data tetap terjamin.
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        // 1. Validasi masukan pengguna
+        $validated = $request->validate([
+            // Input Master Data Tekstual
+            'type'              => 'required|string|max:50',
+            'brand'             => 'required|string|max:50',
+            'model'             => 'required|string|max:100',
+
+            // Atribut Spesifikasi Fisik & Teknis
+            'variant'           => 'nullable|string|max:100',
+            'year'              => 'required|integer|min:1900|max:2100',
+            'color'             => 'nullable|string|max:50',
+            'transmission'      => 'nullable|string|max:20',
+            'fuel_type'         => 'nullable|string|max:20',
+            'engine_capacity'   => 'nullable|integer|min:1',
+            'mileage'           => 'nullable|integer|min:0',
+            'license_plate'     => 'nullable|string|max:15',
+
+            // Legalitas Dokumen Kendaraan
+            'chassis_number'    => 'nullable|string|max:50|unique:vehicles,chassis_number',
+            'engine_number'     => 'nullable|string|max:50|unique:vehicles,engine_number',
+            'registration_year' => 'nullable|integer|min:1900|max:2100',
+
+            // Finansial & Status
+            'purchase_price'    => 'required|numeric|min:0',
+            'selling_price'     => 'required|numeric|min:0',
+            'status'            => 'required|in:AVAILABLE,RESERVED,SOLD,SERVICE,INACTIVE',
+            'description'       => 'nullable|string',
+        ]);
+
+        // 2. Eksekusi penyimpanan dalam satu Database Transaction utuh
+        $vehicle = DB::transaction(function () use ($validated) {
+
+            // A. Sinkronisasi Tipe Kendaraan (Mobil / Motor)
+            $vehicleType = VehicleType::query()
+                ->whereRaw('LOWER(name) = ?', [strtolower(trim($validated['type']))])
+                ->first();
+
+            if (!$vehicleType) {
+                $vehicleType = VehicleType::create([
+                    'name' => trim($validated['type']),
+                ]);
+            }
+
+            // B. Sinkronisasi Brand / Merek Kendaraan
+            $brand = Brand::query()
+                ->whereRaw('LOWER(name) = ?', [strtolower(trim($validated['brand']))])
+                ->first();
+
+            if (!$brand) {
+                $brand = Brand::create([
+                    'name' => trim($validated['brand']),
+                ]);
+            }
+
+            // C. Sinkronisasi Model Kendaraan di bawah Brand yang bersangkutan
+            $vehicleModel = VehicleModel::query()
+                ->where('brand_id', $brand->id)
+                ->whereRaw('LOWER(name) = ?', [strtolower(trim($validated['model']))])
+                ->first();
+
+            if (!$vehicleModel) {
+                $vehicleModel = VehicleModel::create([
+                    'brand_id' => $brand->id,
+                    'name'     => trim($validated['model']),
+                ]);
+            }
+
+            // D. Pembuatan Record Kendaraan Baru
+            return Vehicle::create([
+                'stock_code'        => $this->generateNextStockCode(),
+                'vehicle_type_id'   => $vehicleType->id,
+                'brand_id'          => $brand->id,
+                'model_id'          => $vehicleModel->id,
+                'variant'           => $validated['variant'] ?? null,
+                'year'              => $validated['year'],
+                'color'             => $validated['color'] ?? null,
+                'transmission'      => $validated['transmission'] ?? null,
+                'fuel_type'         => $validated['fuel_type'] ?? null,
+                'engine_capacity'   => $validated['engine_capacity'] ?? null,
+                'mileage'           => $validated['mileage'] ?? null,
+                'license_plate'     => $validated['license_plate'] ?? null,
+                'chassis_number'    => $validated['chassis_number'] ?? null,
+                'engine_number'     => $validated['engine_number'] ?? null,
+                'registration_year' => $validated['registration_year'] ?? null,
+                'purchase_price'    => $validated['purchase_price'],
+                'selling_price'     => $validated['selling_price'],
+                'status'            => $validated['status'],
+                'description'       => $validated['description'] ?? null,
+            ]);
+        });
+
+        return redirect()
+            ->route('admin.vehicles.index')
+            ->with('success', 'Kendaraan berhasil ditambahkan dengan kode stok: ' . $vehicle->stock_code);
+    }
+
+    /**
+     * Menampilkan rincian detail data lengkap satu unit kendaraan beserta galeri foto.
      *
      * @param Vehicle $vehicle
      * @return View
@@ -78,29 +206,158 @@ class VehicleController extends Controller
     }
 
     /**
-     * Menghapus data kendaraan (Hanya jika belum terjual / status bukan SOLD).
+     * Menampilkan formulir edit spesifikasi unit kendaraan.
      *
      * @param Vehicle $vehicle
-     * @return \Illuminate\Http\RedirectResponse
+     * @return View
      */
-    public function destroy(Vehicle $vehicle)
+    public function edit(Vehicle $vehicle): View
     {
-        if ($vehicle->status === 'SOLD') {
+        $vehicle->load([
+            'vehicleType',
+            'brand',
+            'model',
+        ]);
+
+        return view('admin.vehicles.edit', compact('vehicle'));
+    }
+
+    /**
+     * Memperbarui data kendaraan yang telah ada di database.
+     *
+     * @param Request $request
+     * @param Vehicle $vehicle
+     * @return RedirectResponse
+     */
+    public function update(Request $request, Vehicle $vehicle): RedirectResponse
+    {
+        // 1. Validasi masukan pengguna
+        $validated = $request->validate([
+            'type'              => 'required|string|max:50',
+            'brand'             => 'required|string|max:50',
+            'model'             => 'required|string|max:100',
+            'variant'           => 'nullable|string|max:100',
+            'year'              => 'required|integer|min:1900|max:2100',
+            'color'             => 'nullable|string|max:50',
+            'transmission'      => 'nullable|string|max:20',
+            'fuel_type'         => 'nullable|string|max:20',
+            'engine_capacity'   => 'nullable|integer|min:1',
+            'mileage'           => 'nullable|integer|min:0',
+            'license_plate'     => 'nullable|string|max:15',
+
+            // Abaikan ID kendaraan saat ini untuk validasi keunikan nomor rangka & mesin
+            'chassis_number'    => [
+                'nullable',
+                'string',
+                'max:50',
+                'unique:vehicles,chassis_number,' . $vehicle->id,
+            ],
+            'engine_number'     => [
+                'nullable',
+                'string',
+                'max:50',
+                'unique:vehicles,engine_number,' . $vehicle->id,
+            ],
+
+            'registration_year' => 'nullable|integer|min:1900|max:2100',
+            'purchase_price'    => 'required|numeric|min:0',
+            'selling_price'     => 'required|numeric|min:0',
+            'status'            => 'required|in:AVAILABLE,RESERVED,SOLD,SERVICE,INACTIVE',
+            'description'       => 'nullable|string',
+        ]);
+
+        // 2. Eksekusi pembaruan dalam Database Transaction
+        DB::transaction(function () use ($validated, $vehicle) {
+
+            // A. Sinkronisasi / Buat Tipe Kendaraan
+            $vehicleType = VehicleType::query()
+                ->whereRaw('LOWER(name) = ?', [strtolower(trim($validated['type']))])
+                ->first();
+
+            if (!$vehicleType) {
+                $vehicleType = VehicleType::create([
+                    'name' => trim($validated['type']),
+                ]);
+            }
+
+            // B. Sinkronisasi / Buat Brand
+            $brand = Brand::query()
+                ->whereRaw('LOWER(name) = ?', [strtolower(trim($validated['brand']))])
+                ->first();
+
+            if (!$brand) {
+                $brand = Brand::create([
+                    'name' => trim($validated['brand']),
+                ]);
+            }
+
+            // C. Sinkronisasi / Buat Model pada Brand terkait
+            $vehicleModel = VehicleModel::query()
+                ->where('brand_id', $brand->id)
+                ->whereRaw('LOWER(name) = ?', [strtolower(trim($validated['model']))])
+                ->first();
+
+            if (!$vehicleModel) {
+                $vehicleModel = VehicleModel::create([
+                    'brand_id' => $brand->id,
+                    'name'     => trim($validated['model']),
+                ]);
+            }
+
+            // D. Pembaruan data atribut kendaraan (Kode Stok tidak diubah demi konsistensi arsip)
+            $vehicle->update([
+                'vehicle_type_id'   => $vehicleType->id,
+                'brand_id'          => $brand->id,
+                'model_id'          => $vehicleModel->id,
+                'variant'           => $validated['variant'] ?? null,
+                'year'              => $validated['year'],
+                'color'             => $validated['color'] ?? null,
+                'transmission'      => $validated['transmission'] ?? null,
+                'fuel_type'         => $validated['fuel_type'] ?? null,
+                'engine_capacity'   => $validated['engine_capacity'] ?? null,
+                'mileage'           => $validated['mileage'] ?? null,
+                'license_plate'     => $validated['license_plate'] ?? null,
+                'chassis_number'    => $validated['chassis_number'] ?? null,
+                'engine_number'     => $validated['engine_number'] ?? null,
+                'registration_year' => $validated['registration_year'] ?? null,
+                'purchase_price'    => $validated['purchase_price'],
+                'selling_price'     => $validated['selling_price'],
+                'status'            => $validated['status'],
+                'description'       => $validated['description'] ?? null,
+            ]);
+        });
+
+        return redirect()
+            ->route('admin.vehicles.index')
+            ->with('success', 'Data kendaraan berhasil diperbarui.');
+    }
+
+    /**
+     * Menghapus data unit kendaraan dari inventaris.
+     * Kendaraan yang sudah berstatus 'SOLD' dilarang dihapus untuk menjaga keutuhan riwayat laporan keuangan.
+     *
+     * @param Vehicle $vehicle
+     * @return RedirectResponse
+     */
+    public function destroy(Vehicle $vehicle): RedirectResponse
+    {
+        if ($vehicle->status === Vehicle::STATUS_SOLD) {
             return redirect()
                 ->route('admin.vehicles.index')
-                ->with('error', 'Kendaraan yang sudah SOLD tidak dapat dihapus.');
+                ->with('error', 'Kendaraan yang sudah SOLD tidak dapat dihapus demi integritas data laporan.');
         }
 
         $vehicle->delete();
 
         return redirect()
             ->route('admin.vehicles.index')
-            ->with('success', 'Kendaraan berhasil dihapus.');
+            ->with('success', 'Kendaraan berhasil dihapus dari inventaris.');
     }
 
     /**
-     * Menghasilkan Kode Stok otomatis berikutnya.
-     * Format contoh: STK-0001, STK-0002, dst.
+     * Menghasilkan nomor Kode Stok otomatis berikutnya secara berurutan.
+     * Mengambil angka tertinggi dari pola 'STK-XXXX' dan menambahkan 1 dengan padding 4 digit.
+     * Contoh: STK-0001, STK-0002, dst.
      *
      * @return string
      */
@@ -119,295 +376,5 @@ class VehicleController extends Controller
             '0',
             STR_PAD_LEFT
         );
-    }
-
-    /**
-     * Menampilkan form tambah kendaraan baru.
-     *
-     * @return View
-     */
-    public function create(): View
-    {
-        $nextStockCode = $this->generateNextStockCode();
-
-        return view('admin.vehicles.create', compact(
-            'nextStockCode'
-        ));
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            /*
-            |--------------------------------------------------------------------------
-            | Master Data - Input berupa TEXT
-            |--------------------------------------------------------------------------
-            */
-            'type' => 'required|string|max:50',
-            'brand' => 'required|string|max:50',
-            'model' => 'required|string|max:100',
-
-            'variant' => 'nullable|string|max:100',
-            'year' => 'required|integer|min:1900|max:2100',
-            'color' => 'nullable|string|max:50',
-            'transmission' => 'nullable|string|max:20',
-            'fuel_type' => 'nullable|string|max:20',
-            'engine_capacity' => 'nullable|integer|min:1',
-            'mileage' => 'nullable|integer|min:0',
-            'license_plate' => 'nullable|string|max:15',
-
-            'chassis_number' => 'nullable|string|max:50|unique:vehicles,chassis_number',
-            'engine_number' => 'nullable|string|max:50|unique:vehicles,engine_number',
-            'registration_year' => 'nullable|integer|min:1900|max:2100',
-
-            'purchase_price' => 'required|numeric|min:0',
-            'selling_price' => 'required|numeric|min:0',
-
-            'status' => 'required|in:AVAILABLE,RESERVED,SOLD,SERVICE,INACTIVE',
-            'description' => 'nullable|string',
-        ]);
-
-        $vehicle = DB::transaction(function () use ($validated) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Cari / buat Vehicle Type
-            |--------------------------------------------------------------------------
-            */
-            $vehicleType = VehicleType::query()
-                ->whereRaw('LOWER(name) = ?', [
-                    strtolower(trim($validated['type']))
-                ])
-                ->first();
-
-            if (!$vehicleType) {
-                $vehicleType = VehicleType::create([
-                    'name' => trim($validated['type']),
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Cari / buat Brand
-            |--------------------------------------------------------------------------
-            */
-            $brand = Brand::query()
-                ->whereRaw('LOWER(name) = ?', [
-                    strtolower(trim($validated['brand']))
-                ])
-                ->first();
-
-            if (!$brand) {
-                $brand = Brand::create([
-                    'name' => trim($validated['brand']),
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Cari / buat Model berdasarkan Brand
-            |--------------------------------------------------------------------------
-            */
-            $vehicleModel = VehicleModel::query()
-                ->where('brand_id', $brand->id)
-                ->whereRaw('LOWER(name) = ?', [
-                    strtolower(trim($validated['model']))
-                ])
-                ->first();
-
-            if (!$vehicleModel) {
-                $vehicleModel = VehicleModel::create([
-                    'brand_id' => $brand->id,
-                    'name' => trim($validated['model']),
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Data kendaraan
-            |--------------------------------------------------------------------------
-            */
-            return Vehicle::create([
-                'stock_code' => $this->generateNextStockCode(),
-
-                'vehicle_type_id' => $vehicleType->id,
-                'brand_id' => $brand->id,
-                'model_id' => $vehicleModel->id,
-
-                'variant' => $validated['variant'] ?? null,
-                'year' => $validated['year'],
-                'color' => $validated['color'] ?? null,
-                'transmission' => $validated['transmission'] ?? null,
-                'fuel_type' => $validated['fuel_type'] ?? null,
-                'engine_capacity' => $validated['engine_capacity'] ?? null,
-                'mileage' => $validated['mileage'] ?? null,
-                'license_plate' => $validated['license_plate'] ?? null,
-
-                'chassis_number' => $validated['chassis_number'] ?? null,
-                'engine_number' => $validated['engine_number'] ?? null,
-                'registration_year' => $validated['registration_year'] ?? null,
-
-                'purchase_price' => $validated['purchase_price'],
-                'selling_price' => $validated['selling_price'],
-
-                'status' => $validated['status'],
-                'description' => $validated['description'] ?? null,
-            ]);
-        });
-
-        return redirect()
-            ->route('admin.vehicles.index')
-            ->with('success', 'Kendaraan berhasil ditambahkan.');
-    }
-
-    public function edit(Vehicle $vehicle): View
-    {
-        $vehicle->load([
-            'vehicleType',
-            'brand',
-            'model',
-        ]);
-
-        return view('admin.vehicles.edit', compact(
-            'vehicle'
-        ));
-    }
-
-    public function update(Request $request, Vehicle $vehicle)
-    {
-        $validated = $request->validate([
-            'type' => 'required|string|max:50',
-            'brand' => 'required|string|max:50',
-            'model' => 'required|string|max:100',
-
-            'variant' => 'nullable|string|max:100',
-            'year' => 'required|integer|min:1900|max:2100',
-            'color' => 'nullable|string|max:50',
-            'transmission' => 'nullable|string|max:20',
-            'fuel_type' => 'nullable|string|max:20',
-            'engine_capacity' => 'nullable|integer|min:1',
-            'mileage' => 'nullable|integer|min:0',
-            'license_plate' => 'nullable|string|max:15',
-
-            'chassis_number' => [
-                'nullable',
-                'string',
-                'max:50',
-                'unique:vehicles,chassis_number,' . $vehicle->id,
-            ],
-
-            'engine_number' => [
-                'nullable',
-                'string',
-                'max:50',
-                'unique:vehicles,engine_number,' . $vehicle->id,
-            ],
-
-            'registration_year' => 'nullable|integer|min:1900|max:2100',
-
-            'purchase_price' => 'required|numeric|min:0',
-            'selling_price' => 'required|numeric|min:0',
-
-            'status' => 'required|in:AVAILABLE,RESERVED,SOLD,SERVICE,INACTIVE',
-
-            'description' => 'nullable|string',
-        ]);
-
-        DB::transaction(function () use ($validated, $vehicle) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Cari / buat Vehicle Type
-            |--------------------------------------------------------------------------
-            */
-
-            $vehicleType = VehicleType::query()
-                ->whereRaw('LOWER(name) = ?', [
-                    strtolower(trim($validated['type']))
-                ])
-                ->first();
-
-            if (!$vehicleType) {
-                $vehicleType = VehicleType::create([
-                    'name' => trim($validated['type']),
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Cari / buat Brand
-            |--------------------------------------------------------------------------
-            */
-
-            $brand = Brand::query()
-                ->whereRaw('LOWER(name) = ?', [
-                    strtolower(trim($validated['brand']))
-                ])
-                ->first();
-
-            if (!$brand) {
-                $brand = Brand::create([
-                    'name' => trim($validated['brand']),
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Cari / buat Model berdasarkan Brand
-            |--------------------------------------------------------------------------
-            */
-
-            $vehicleModel = VehicleModel::query()
-                ->where('brand_id', $brand->id)
-                ->whereRaw('LOWER(name) = ?', [
-                    strtolower(trim($validated['model']))
-                ])
-                ->first();
-
-            if (!$vehicleModel) {
-                $vehicleModel = VehicleModel::create([
-                    'brand_id' => $brand->id,
-                    'name' => trim($validated['model']),
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Update kendaraan
-            |--------------------------------------------------------------------------
-            */
-
-            $vehicle->update([
-                // Stock Code sengaja TIDAK diubah.
-                // Nilai lama tetap dipertahankan.
-
-                'vehicle_type_id' => $vehicleType->id,
-                'brand_id' => $brand->id,
-                'model_id' => $vehicleModel->id,
-
-                'variant' => $validated['variant'] ?? null,
-                'year' => $validated['year'],
-                'color' => $validated['color'] ?? null,
-                'transmission' => $validated['transmission'] ?? null,
-                'fuel_type' => $validated['fuel_type'] ?? null,
-                'engine_capacity' => $validated['engine_capacity'] ?? null,
-                'mileage' => $validated['mileage'] ?? null,
-                'license_plate' => $validated['license_plate'] ?? null,
-
-                'chassis_number' => $validated['chassis_number'] ?? null,
-                'engine_number' => $validated['engine_number'] ?? null,
-                'registration_year' => $validated['registration_year'] ?? null,
-
-                'purchase_price' => $validated['purchase_price'],
-                'selling_price' => $validated['selling_price'],
-
-                'status' => $validated['status'],
-                'description' => $validated['description'] ?? null,
-            ]);
-        });
-
-        return redirect()
-            ->route('admin.vehicles.index')
-            ->with('success', 'Kendaraan berhasil diperbarui.');
     }
 }

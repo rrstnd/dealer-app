@@ -3,36 +3,45 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
 use App\Models\Vehicle;
+use App\Models\VehicleType;
 use Illuminate\View\View;
 
 /**
- * Controller untuk Halaman Utama (Landing Page Website) Suja Mobilindo.
+ * Controller Halaman Depan / Beranda (Landing Page Publik) Suja Mobilindo.
+ *
+ * Mengelola etalase kendaraan unggulan terkini yang siap dipasarkan kepada pengunjung umum,
+ * serta menyuplai master data Brand dan Tipe untuk bilah pencarian cepat di hero section.
  */
 class HomeController extends Controller
 {
     /**
-     * Menampilkan halaman utama website beserta katalog kendaraan terbaru yang siap dijual.
+     * Menampilkan beranda publik beserta 6 unit kendaraan terbaru berstatus 'AVAILABLE'.
+     *
+     * Eager loading relasi (brand, model, vehicleType, primaryImage) diimplementasikan
+     * untuk mencegah masalah performa N+1 Query.
      *
      * @return View
      */
     public function index(): View
     {
-        // Mengambil 6 kendaraan terbaru dengan status 'AVAILABLE'
-        // Eager Loading relasi (brand, model, vehicleType, primaryImage) untuk mencegah N+1 Query problem
+        // 1. Ambil 6 unit kendaraan terbaru yang berstatus siap dijual (AVAILABLE)
         $vehicles = Vehicle::with([
             'brand',
             'model',
             'vehicleType',
             'primaryImage',
         ])
-            ->where('status', 'AVAILABLE') // Hanya yang siap jual
-            ->latest()                     // Urutkan dari yang terbaru diinput
-            ->take(6)                      // Ambil maksimal 6 unit untuk ditampilkan di Beranda
+            ->where('status', Vehicle::STATUS_AVAILABLE)
+            ->latest()
+            ->take(6)
             ->get();
 
-        // Mengirimkan data kendaraan ke view website.home
-        return view('website.home', compact('vehicles'));
+        // 2. Ambil data Brand dan Tipe kendaraan untuk filter cepat di Beranda
+        $brands       = Brand::orderBy('name')->get();
+        $vehicleTypes = VehicleType::orderBy('name')->get();
+
+        return view('website.home', compact('vehicles', 'brands', 'vehicleTypes'));
     }
 }
-

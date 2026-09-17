@@ -10,7 +10,11 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
- * Controller untuk Katalog Kendaraan (Publik Website) Suja Mobilindo.
+ * Controller Katalog Kendaraan (Publik Website) Suja Mobilindo.
+ *
+ * Mengelola antarmuka penelusuran katalog unit oleh pengunjung website,
+ * termasuk pencarian kata kunci, penyaringan multi-parameter (merek, jenis transmisi, bahan bakar,
+ * tahun produksi, rentang harga), pengurutan dinamis (sorting), serta tampilan spesifikasi detail unit.
  */
 class VehicleController extends Controller
 {
@@ -22,7 +26,7 @@ class VehicleController extends Controller
      */
     public function index(Request $request): View
     {
-        // 1. Validasi parameter query pencarian & filter dari request
+        // 1. Validasi parameter query pencarian & filter dari request URL
         $request->validate([
             'search'          => 'nullable|string|max:100',
             'vehicle_type_id' => 'nullable|integer|exists:vehicle_types,id',
@@ -31,18 +35,22 @@ class VehicleController extends Controller
             'year_max'        => 'nullable|integer|min:1900|max:2100',
             'price_min'       => 'nullable|numeric|min:0',
             'price_max'       => 'nullable|numeric|min:0',
+            'price_range'     => 'nullable|string',
+            'year'            => 'nullable|integer|min:1900|max:2100',
+            'transmission'    => 'nullable|string|max:50',
+            'fuel_type'       => 'nullable|string|max:50',
             'sort'            => 'nullable|in:price_asc,price_desc,year_desc',
         ]);
 
-        // 2. Inisialisasi Query Builder kendaraan hanya dengan status 'AVAILABLE'
+        // 2. Inisialisasi Query Builder kendaraan hanya untuk unit yang berstatus siap jual (AVAILABLE)
         $query = Vehicle::with([
             'brand',
             'model',
             'vehicleType',
             'primaryImage',
-        ])->where('status', 'AVAILABLE');
+        ])->where('status', Vehicle::STATUS_AVAILABLE);
 
-        // 3. Filter Pencarian Teks (Kode Stok, Plat Nomor, Nama Brand, atau Nama Model)
+        // 3. Filter Pencarian Teks Bebas (Kode Stok, Plat Nomor, Nama Brand, atau Nama Model)
         if ($request->filled('search')) {
             $search = $request->search;
 
@@ -68,7 +76,20 @@ class VehicleController extends Controller
             $query->where('brand_id', $request->brand_id);
         }
 
-        // 6. Filter Rentang Tahun Pembuatan
+        // 6. Filter Jenis Transmisi (Automatic / Manual / CVT)
+        if ($request->filled('transmission')) {
+            $query->where('transmission', 'like', '%' . $request->transmission . '%');
+        }
+
+        // 7. Filter Jenis Bahan Bakar (Bensin / Diesel / Hybrid / Listrik)
+        if ($request->filled('fuel_type')) {
+            $query->where('fuel_type', 'like', '%' . $request->fuel_type . '%');
+        }
+
+        // 8. Filter Tahun Pembuatan
+        if ($request->filled('year')) {
+            $query->where('year', $request->year);
+        }
         if ($request->filled('year_min')) {
             $query->where('year', '>=', $request->year_min);
         }
@@ -76,15 +97,32 @@ class VehicleController extends Controller
             $query->where('year', '<=', $request->year_max);
         }
 
-        // 7. Filter Rentang Harga Jual
-        if ($request->filled('price_min')) {
-            $query->where('selling_price', '>=', $request->price_min);
-        }
-        if ($request->filled('price_max')) {
-            $query->where('selling_price', '<=', $request->price_max);
+        // 9. Filter Rentang Harga Jual (Preset Cepat atau Input Manual)
+        if ($request->filled('price_range')) {
+            switch ($request->price_range) {
+                case 'under_150':
+                    $query->where('selling_price', '<', 150000000);
+                    break;
+                case '150_300':
+                    $query->whereBetween('selling_price', [150000000, 300000000]);
+                    break;
+                case '300_500':
+                    $query->whereBetween('selling_price', [300000000, 500000000]);
+                    break;
+                case 'above_500':
+                    $query->where('selling_price', '>', 500000000);
+                    break;
+            }
+        } else {
+            if ($request->filled('price_min')) {
+                $query->where('selling_price', '>=', $request->price_min);
+            }
+            if ($request->filled('price_max')) {
+                $query->where('selling_price', '<=', $request->price_max);
+            }
         }
 
-        // 8. Opsi Pengurutan (Sorting)
+        // 10. Opsi Pengurutan Data (Sorting)
         $sort = $request->get('sort');
 
         switch ($sort) {
@@ -101,40 +139,38 @@ class VehicleController extends Controller
                 break;
 
             default:
-                $query->latest(); // Terbaru diinput
+                $query->latest(); // Default: unit yang paling baru diinput ke sistem
                 break;
         }
 
-        // 9. Ambil data dengan Pagination (12 kendaraan per halaman) & pertahankan Query String
+        // 11. Paginasi Hasil (12 unit per halaman) & sertakan seluruh parameter filter di URL
         $vehicles = $query
             ->paginate(12)
             ->withQueryString();
 
-        // 10. Ambil opsi Brand & Tipe Kendaraan untuk dropdown filter di view
-        $brands = Brand::orderBy('name')->get();
+        // 12. Ambil master data pendukung untuk dropdown filter pada tampilan katalog
+        $brands       = Brand::orderBy('name')->get();
         $vehicleTypes = VehicleType::orderBy('name')->get();
 
-        return view(
-            'website.vehicles.index',
-            compact('vehicles', 'brands', 'vehicleTypes')
-        );
+        return view('website.vehicles.index', compact('vehicles', 'brands', 'vehicleTypes'));
     }
 
     /**
-     * Menampilkan detail lengkap satu unit kendaraan.
+     * Menampilkan detail lengkap satu unit kendaraan beserta galeri dokumentasi foto fisik.
      *
      * @param Vehicle $vehicle
      * @return View
      */
     public function show(Vehicle $vehicle): View
     {
-        // Pengunjung umum hanya diperbolehkan melihat kendaraan yang berstatus AVAILABLE
+        // Pengunjung umum hanya diperkenankan melihat halaman detail unit yang berstatus AVAILABLE
         abort_unless(
-            $vehicle->status === 'AVAILABLE',
-            404
+            $vehicle->status === Vehicle::STATUS_AVAILABLE,
+            404,
+            'Kendaraan yang dicari tidak ditemukan atau sudah tidak tersedia.'
         );
 
-        // Load relasi data lengkap (Brand, Model, Tipe, & Galeri Foto)
+        // Eager load seluruh relasi data pendukung spesifikasi unit dan galeri foto
         $vehicle->load([
             'brand',
             'model',
@@ -142,9 +178,6 @@ class VehicleController extends Controller
             'images',
         ]);
 
-        return view(
-            'website.vehicles.show',
-            compact('vehicle')
-        );
+        return view('website.vehicles.show', compact('vehicle'));
     }
 }

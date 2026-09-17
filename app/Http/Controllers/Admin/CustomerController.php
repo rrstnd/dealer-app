@@ -4,19 +4,29 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+/**
+ * Controller Pengelolaan Data Pelanggan / Konsumen (CRUD) Panel Admin Suja Mobilindo.
+ *
+ * Mengelola pendaftaran pelanggan baru, validasi identitas (NIK & Nomor HP),
+ * pencarian multi-kolom, pembaruan profil pelanggan, serta penghapusan data.
+ */
 class CustomerController extends Controller
 {
     /**
-     * Menampilkan daftar seluruh data customer dengan fitur pencarian & paginasi.
+     * Menampilkan daftar seluruh data pelanggan dengan fitur pencarian teks dan paginasi.
+     *
+     * @param Request $request
+     * @return View
      */
     public function index(Request $request): View
     {
         $query = Customer::query();
 
-        // Fitur pencarian berdasarkan Kode, Nama, NIK, atau No HP
+        // Fitur Pencarian Multi-Kolom: Kode Pelanggan, Nama Lengkap, NIK KTP, atau Nomor Telepon
         if ($request->filled('search')) {
             $search = $request->search;
 
@@ -28,7 +38,7 @@ class CustomerController extends Controller
             });
         }
 
-        // Ambil data terbaru dengan paginasi 10 item per halaman
+        // Urutkan dari data yang paling baru diinput dengan paginasi 10 baris per halaman
         $customers = $query
             ->latest()
             ->paginate(10)
@@ -38,7 +48,9 @@ class CustomerController extends Controller
     }
 
     /**
-     * Menampilkan formulir tambah customer baru.
+     * Menampilkan formulir pendaftaran pelanggan baru.
+     *
+     * @return View
      */
     public function create(): View
     {
@@ -46,9 +58,12 @@ class CustomerController extends Controller
     }
 
     /**
-     * Menyimpan data customer baru ke dalam database.
+     * Menyimpan data pelanggan baru ke database.
+     *
+     * @param Request $request
+     * @return RedirectResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'customer_code' => 'required|string|max:30|unique:customers,customer_code',
@@ -66,19 +81,30 @@ class CustomerController extends Controller
 
         return redirect()
             ->route('admin.customers.index')
-            ->with('success', 'Data Customer berhasil ditambahkan.');
+            ->with('success', 'Data pelanggan berhasil ditambahkan.');
     }
 
     /**
-     * Menampilkan detail lengkap seorang customer.
+     * Menampilkan rincian profil lengkap satu pelanggan beserta riwayat transaksi pembelian unit.
+     *
+     * @param Customer $customer
+     * @return View
      */
     public function show(Customer $customer): View
     {
+        $customer->load([
+            'sales.vehicle.brand',
+            'sales.vehicle.model',
+        ]);
+
         return view('admin.customers.show', compact('customer'));
     }
 
     /**
-     * Menampilkan formulir edit data customer.
+     * Menampilkan formulir pengeditan data pelanggan.
+     *
+     * @param Customer $customer
+     * @return View
      */
     public function edit(Customer $customer): View
     {
@@ -86,9 +112,14 @@ class CustomerController extends Controller
     }
 
     /**
-     * Memperbarui data customer yang sudah ada di database.
+     * Memperbarui data pelanggan yang telah tersimpan di database.
+     * Mengabaikan ID pelanggan saat ini saat memeriksa keunikan Kode Pelanggan dan NIK.
+     *
+     * @param Request $request
+     * @param Customer $customer
+     * @return RedirectResponse
      */
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, Customer $customer): RedirectResponse
     {
         $validated = $request->validate([
             'customer_code' => 'required|string|max:30|unique:customers,customer_code,' . $customer->id,
@@ -106,18 +137,28 @@ class CustomerController extends Controller
 
         return redirect()
             ->route('admin.customers.index')
-            ->with('success', 'Data Customer berhasil diperbarui.');
+            ->with('success', 'Data pelanggan berhasil diperbarui.');
     }
 
     /**
-     * Menghapus data customer dari database.
+     * Menghapus data pelanggan dari sistem.
+     *
+     * @param Customer $customer
+     * @return RedirectResponse
      */
-    public function destroy(Customer $customer)
+    public function destroy(Customer $customer): RedirectResponse
     {
+        // Pastikan tidak menghapus pelanggan yang memiliki riwayat transaksi aktif
+        if ($customer->sales()->exists()) {
+            return redirect()
+                ->route('admin.customers.index')
+                ->with('error', 'Pelanggan ini memiliki riwayat transaksi penjualan dan tidak dapat dihapus.');
+        }
+
         $customer->delete();
 
         return redirect()
             ->route('admin.customers.index')
-            ->with('success', 'Data Customer berhasil dihapus.');
+            ->with('success', 'Data pelanggan berhasil dihapus.');
     }
 }

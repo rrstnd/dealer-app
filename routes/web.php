@@ -2,11 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Controller Website (Public Access)
+// Controller Website Publik (Akses Bebas Pengunjung)
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\VehicleController as WebsiteVehicleController;
 
-// Controller Admin (Management Access)
+// Controller Panel Administrasi (Akses Pengelola / Staf)
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -19,31 +19,32 @@ use App\Http\Controllers\Admin\VehicleModelController;
 
 /*
 |--------------------------------------------------------------------------
-| WEBSITE / PUBLIC ROUTES
+| WEBSITE / PUBLIC ROUTES (RUTE PUBLIK)
 |--------------------------------------------------------------------------
-| Rute untuk pengunjung umum (Website Suja Mobilindo).
-| Tidak memerlukan otentikasi (login).
+| Rute yang dapat diakses secara bebas oleh pengunjung umum website.
+| Tidak memerlukan proses autentikasi (login).
 */
 
-// Halaman Utama / Landing Page
+// Halaman Utama / Landing Page Showcase Showroom
 Route::get('/', [HomeController::class, 'index'])
     ->name('home');
 
-// Katalog Kendaraan (Daftar & Filter)
+// Penelusuran Katalog Kendaraan (Daftar Unit, Pencarian Kata Kunci, Multi-Filter, Sorting)
 Route::get('/vehicles', [WebsiteVehicleController::class, 'index'])
     ->name('vehicles.index');
 
-// Detail Kendaraan
+// Halaman Detail & Galeri Spesifikasi Unit Kendaraan
 Route::get('/vehicles/{vehicle}', [WebsiteVehicleController::class, 'show'])
     ->name('vehicles.show');
 
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN PORTAL ROUTES
+| ADMIN PORTAL ROUTES (PANEL ADMINISTRASI)
 |--------------------------------------------------------------------------
-| Rute untuk panel administrasi aplikasi Suja Mobilindo.
-| Wajib melewati middleware 'auth' (harus login terlebih dahulu).
+| Rute untuk pengelolaan data showroom Suja Mobilindo.
+| Wajib melewati middleware 'auth' (harus login terlebih dahulu sebagai admin/staf).
+| Seluruh URL diawali dengan prefix '/admin' dan nama rute diawali dengan 'admin.'.
 */
 
 Route::prefix('admin')
@@ -51,11 +52,15 @@ Route::prefix('admin')
     ->middleware('auth')
     ->group(function () {
 
-        // --- DASHBOARD ADMIN ---
+        // ==========================================
+        // 1. DASHBOARD RINGKASAN EKSEKUTIF
+        // ==========================================
         Route::get('/', [DashboardController::class, 'index'])
             ->name('dashboard');
 
-        // --- MANAJEMEN KENDARAAN (VEHICLES) ---
+        // ==========================================
+        // 2. MANAJEMEN INVENTARIS KENDARAAN (VEHICLES)
+        // ==========================================
         Route::get('/vehicles', [VehicleController::class, 'index'])
             ->name('vehicles.index');
 
@@ -77,36 +82,48 @@ Route::prefix('admin')
         Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])
             ->name('vehicles.destroy');
 
-        // --- AJAX SEARCH & STORE UNTUK MASTER DATA ---
+        // ==========================================
+        // 3. ENDPOINT AJAX MASTER DATA (SEARCH & MODAL QUICK-CREATE)
+        // ==========================================
+        // Autocomplete & Quick-Create Tipe Kendaraan
         Route::get('/vehicle-types/search', [VehicleTypeController::class, 'search'])
             ->name('vehicle-types.search');
 
         Route::post('/vehicle-types', [VehicleTypeController::class, 'store'])
             ->name('vehicle-types.store');
 
+        // Autocomplete & Quick-Create Brand / Merek
         Route::get('/brands/search', [BrandController::class, 'search'])
             ->name('brands.search');
 
         Route::post('/brands', [BrandController::class, 'store'])
             ->name('brands.store');
 
+        // Autocomplete & Quick-Create Model Kendaraan
         Route::get('/vehicle-models/search', [VehicleModelController::class, 'search'])
             ->name('vehicle-models.search');
 
         Route::post('/vehicle-models', [VehicleModelController::class, 'store'])
             ->name('vehicle-models.store');
 
-        // --- MANAJEMEN FOTO KENDARAAN (VEHICLE IMAGES) ---
+        // ==========================================
+        // 4. GALERI DOKUMENTASI FOTO KENDARAAN (VEHICLE IMAGES)
+        // ==========================================
+        // Upload foto baru ke unit
         Route::post('/vehicles/{vehicle}/images', [VehicleImageController::class, 'store'])
             ->name('vehicles.images.store');
 
+        // Hapus foto dari galeri
         Route::delete('/vehicles/{vehicle}/images/{image}', [VehicleImageController::class, 'destroy'])
             ->name('vehicles.images.destroy');
 
+        // Tetapkan sebagai foto sampul utama (Primary Thumbnail)
         Route::patch('/vehicles/{vehicle}/images/{image}/primary', [VehicleImageController::class, 'setPrimary'])
             ->name('vehicles.images.primary');
 
-        // --- MANAJEMEN PELANGGAN (CUSTOMERS) ---
+        // ==========================================
+        // 5. MANAJEMEN DATA PELANGGAN (CUSTOMERS)
+        // ==========================================
         Route::get('/customers', [CustomerController::class, 'index'])
             ->name('customers.index');
 
@@ -128,7 +145,9 @@ Route::prefix('admin')
         Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])
             ->name('customers.destroy');
 
-        // --- TRANSAKSI PENJUALAN (SALES) ---
+        // ==========================================
+        // 6. TRANSAKSI PENJUALAN UNIT (SALES)
+        // ==========================================
         Route::get('/sales', [SaleController::class, 'index'])
             ->name('sales.index');
 
@@ -150,7 +169,9 @@ Route::prefix('admin')
         Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel'])
             ->name('sales.cancel');
 
-        // --- LAPORAN (REPORTS) ---
+        // ==========================================
+        // 7. LAPORAN & EKSPOR DATA KEUANGAN (REPORTS)
+        // ==========================================
         Route::get('/reports', [ReportController::class, 'sales'])
             ->name('reports.sales');
 
@@ -160,8 +181,9 @@ Route::prefix('admin')
 
 /*
 |--------------------------------------------------------------------------
-| AUTHENTICATION ROUTES
+| AUTHENTICATION ROUTES (AUTENTIKASI BREEZE)
 |--------------------------------------------------------------------------
-| Route default dari Laravel Breeze untuk Login, Register, Logout, dll.
+| Rute autentikasi standar bawaan Laravel Breeze:
+| Login, Register, Forgot Password, Reset Password, Confirm Password, dan Logout.
 */
 require __DIR__ . '/auth.php';

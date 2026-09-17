@@ -8,7 +8,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Controller AJAX Master Data Model Kendaraan.
+ * Controller Endpoint AJAX untuk Master Data Model Kendaraan.
+ *
+ * Menyediakan layanan penyaringan model berdasarkan Brand tertentu (dependent dropdown)
+ * serta pembuatan model baru secara asinkron (AJAX modal).
  */
 class VehicleModelController extends Controller
 {
@@ -47,7 +50,7 @@ class VehicleModelController extends Controller
     }
 
     /**
-     * Menambahkan model kendaraan baru untuk brand tertentu secara dinamis via AJAX.
+     * Menambahkan model kendaraan baru di bawah suatu brand tertentu secara dinamis via AJAX.
      *
      * @param Request $request
      * @return JsonResponse
@@ -66,22 +69,25 @@ class VehicleModelController extends Controller
             ],
         ]);
 
-        // Cek duplikasi model pada brand yang sama (case-insensitive)
+        // Pencegahan duplikasi nama model pada brand yang sama (case-insensitive)
         $exists = VehicleModel::where('brand_id', $validated['brand_id'])
-            ->whereRaw('LOWER(name) = ?', [strtolower($validated['name'])])
+            ->whereRaw('LOWER(name) = ?', [strtolower(trim($validated['name']))])
             ->exists();
 
         if ($exists) {
             return response()->json([
-                'message' => 'Model dengan nama tersebut sudah ada pada brand ini.',
+                'message' => 'Model dengan nama tersebut sudah terdaftar pada merek ini.',
             ], 422);
         }
 
-        $model = VehicleModel::create($validated);
+        $model = VehicleModel::create([
+            'brand_id' => $validated['brand_id'],
+            'name'     => trim($validated['name']),
+        ]);
 
         return response()->json([
             'message' => 'Model kendaraan berhasil ditambahkan.',
-            'data' => $model,
+            'data'    => $model,
         ], 201);
     }
 }

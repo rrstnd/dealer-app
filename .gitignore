@@ -10,3 +10,5 @@
 /storage/*.key
 /storage/app/public/
 /public/hot
+ngrok.exe
+*.exe

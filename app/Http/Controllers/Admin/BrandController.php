@@ -8,12 +8,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Controller AJAX Master Data Merek / Brand Kendaraan.
+ * Controller Endpoint AJAX untuk Master Data Merek / Brand Kendaraan.
+ *
+ * Menyediakan layanan pencarian cepat autocompletion untuk dropdown select
+ * serta pembuatan entitas Brand baru secara asinkron (AJAX modal).
  */
 class BrandController extends Controller
 {
     /**
-     * Pencarian merek kendaraan via AJAX untuk autocompletion dropdown.
+     * Pencarian merek kendaraan via AJAX untuk keperluan dropdown autocomplete.
      *
      * @param Request $request
      * @return JsonResponse
@@ -54,7 +57,7 @@ class BrandController extends Controller
 
         return response()->json([
             'message' => 'Brand berhasil ditambahkan.',
-            'data' => $brand,
+            'data'    => $brand,
         ], 201);
     }
 }

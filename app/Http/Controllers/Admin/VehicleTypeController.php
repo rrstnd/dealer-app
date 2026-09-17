@@ -8,12 +8,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Controller AJAX Master Data Tipe Kendaraan (Mobil / Motor).
+ * Controller Endpoint AJAX untuk Master Data Tipe / Jenis Kendaraan (Mobil, Motor).
+ *
+ * Menyediakan layanan autocompletion untuk dropdown serta pembuatan entitas Tipe baru secara asinkron.
  */
 class VehicleTypeController extends Controller
 {
     /**
-     * Pencarian tipe kendaraan via AJAX untuk autocompletion dropdown.
+     * Pencarian tipe kendaraan via AJAX untuk keperluan dropdown autocomplete.
      *
      * @param Request $request
      * @return JsonResponse
@@ -34,7 +36,7 @@ class VehicleTypeController extends Controller
     }
 
     /**
-     * Menambahkan tipe kendaraan baru secara dinamis via AJAX.
+     * Menambahkan jenis / tipe kendaraan baru secara dinamis via AJAX.
      *
      * @param Request $request
      * @return JsonResponse
@@ -54,11 +56,14 @@ class VehicleTypeController extends Controller
             ],
         ]);
 
-        $type = VehicleType::create($validated);
+        $type = VehicleType::create([
+            'name'        => trim($validated['name']),
+            'description' => $validated['description'] ?? null,
+        ]);
 
         return response()->json([
             'message' => 'Tipe kendaraan berhasil ditambahkan.',
-            'data' => $type,
+            'data'    => $type,
         ], 201);
     }
 }

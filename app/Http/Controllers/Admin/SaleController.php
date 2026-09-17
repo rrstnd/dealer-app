@@ -12,12 +12,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
- * Controller Transaksi Penjualan Unit Kendaraan Panel Admin Suja Mobilindo.
+ * Controller Manajemen Transaksi Penjualan Unit Kendaraan Panel Admin Suja Mobilindo.
+ *
+ * Mengelola alur order, pembuatan nomor invoice otomatis, kalkulasi diskon dan harga final,
+ * penguncian baris database (pessimistic locking) untuk mencegah double-booking kendaraan,
+ * serta sinkronisasi status inventaris kendaraan (AVAILABLE, RESERVED, SOLD).
  */
 class SaleController extends Controller
 {
     /**
-     * Menampilkan daftar seluruh riwayat transaksi penjualan.
+     * Menampilkan daftar riwayat seluruh transaksi penjualan dengan relasi Pelanggan & Kendaraan.
      *
      * @return View
      */
@@ -36,7 +40,8 @@ class SaleController extends Controller
     }
 
     /**
-     * Menampilkan form pembuatan transaksi penjualan baru.
+     * Menampilkan formulir pendaftaran transaksi penjualan baru.
+     * Hanya unit kendaraan dengan status 'AVAILABLE' yang ditampilkan untuk dipilih.
      *
      * @return View
      */
@@ -44,24 +49,25 @@ class SaleController extends Controller
     {
         $customers = Customer::orderBy('name')->get();
 
-        // Hanya mengambil unit kendaraan yang masih AVAILABLE
+        // Ambil unit yang berstatus AVAILABLE dan siap dijual
         $vehicles = Vehicle::with([
             'brand',
             'model',
         ])
-            ->where('status', 'AVAILABLE')
+            ->where('status', Vehicle::STATUS_AVAILABLE)
             ->orderBy('stock_code')
             ->get();
 
-        return view(
-            'admin.sales.create',
-            compact('customers', 'vehicles')
-        );
+        return view('admin.sales.create', compact('customers', 'vehicles'));
     }
 
     /**
      * Menyimpan transaksi penjualan baru ke database.
-     * Menggunakan DB Transaction & Pessimistic Locking (lockForUpdate) untuk mencegah race condition.
+     *
+     * Catatan Pengembangan Penting:
+     * - Menggunakan DB::transaction untuk memastikan atomisitas penyimpanan data penjualan dan pembaruan status unit.
+     * - Menggunakan lockForUpdate() pada record kendaraan untuk mencegah Race Condition / Double Selling jika ada
+     *   beberapa staf admin/sales yang menginput transaksi pada unit yang sama secara bersamaan.
      *
      * @param Request $request
      * @return RedirectResponse
@@ -79,30 +85,30 @@ class SaleController extends Controller
         ]);
 
         DB::transaction(function () use ($validated) {
-            // Lock record kendaraan untuk update aman
+            // 1. Kunci baris data kendaraan secara eksklusif (Pessimistic Locking)
             $vehicle = Vehicle::where('id', $validated['vehicle_id'])
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Kendaraan harus dalam kondisi AVAILABLE
-            if ($vehicle->status !== 'AVAILABLE') {
-                abort(422, 'Kendaraan sudah tidak tersedia untuk dijual.');
+            // 2. Pastikan unit masih dalam status AVAILABLE
+            if ($vehicle->status !== Vehicle::STATUS_AVAILABLE) {
+                abort(422, 'Kendaraan ini sudah tidak tersedia untuk dijual (status: ' . $vehicle->status . ').');
             }
 
-            $vehiclePrice = $vehicle->selling_price;
-            $discount     = $validated['discount'] ?? 0;
+            $vehiclePrice = (float) $vehicle->selling_price;
+            $discount     = (float) ($validated['discount'] ?? 0);
 
             if ($discount > $vehiclePrice) {
-                abort(422, 'Discount tidak boleh lebih besar dari harga kendaraan.');
+                abort(422, 'Nominal diskon tidak boleh melebihi harga jual kendaraan.');
             }
 
             $finalPrice = $vehiclePrice - $discount;
 
-            // Generate nomor invoice transaksi otomatis (Contoh: INV-2026-0001)
+            // 3. Generate nomor faktur/invoice otomatis (Contoh: INV-2026-0001)
             $invoiceNumber = 'INV-' . now()->format('Y') . '-' .
                 str_pad((Sale::max('id') ?? 0) + 1, 4, '0', STR_PAD_LEFT);
 
-            // Simpan data transaksi penjualan
+            // 4. Simpan record transaksi penjualan
             Sale::create([
                 'invoice_number' => $invoiceNumber,
                 'customer_id'    => $validated['customer_id'],
@@ -116,21 +122,21 @@ class SaleController extends Controller
                 'notes'          => $validated['notes'] ?? null,
             ]);
 
-            // Update status kendaraan sesuai status transaksi
-            if ($validated['status'] === 'COMPLETED') {
-                $vehicle->update(['status' => 'SOLD']);
-            } elseif ($validated['status'] === 'BOOKED') {
-                $vehicle->update(['status' => 'RESERVED']);
+            // 5. Sinkronisasi status inventaris kendaraan sesuai status transaksi
+            if ($validated['status'] === Sale::STATUS_COMPLETED) {
+                $vehicle->update(['status' => Vehicle::STATUS_SOLD]);
+            } elseif ($validated['status'] === Sale::STATUS_BOOKED) {
+                $vehicle->update(['status' => Vehicle::STATUS_RESERVED]);
             }
         });
 
         return redirect()
             ->route('admin.sales.index')
-            ->with('success', 'Penjualan berhasil disimpan.');
+            ->with('success', 'Transaksi penjualan berhasil disimpan.');
     }
 
     /**
-     * Menampilkan detail lengkap satu transaksi penjualan.
+     * Menampilkan detail lengkap satu faktur transaksi penjualan beserta spesifikasi unit dan pembeli.
      *
      * @param Sale $sale
      * @return View
@@ -148,7 +154,8 @@ class SaleController extends Controller
     }
 
     /**
-     * Menampilkan form edit transaksi penjualan.
+     * Menampilkan formulir edit transaksi penjualan.
+     * Opsi kendaraan mencakup: Seluruh unit AVAILABLE + unit yang sedang dikaitkan pada transaksi ini.
      *
      * @param Sale $sale
      * @return View
@@ -157,26 +164,25 @@ class SaleController extends Controller
     {
         $customers = Customer::orderBy('name')->get();
 
-        // Opsi kendaraan: kendaraan yang AVAILABLE + kendaraan yang saat ini sedang dipilih di transaksi ini
         $vehicles = Vehicle::with([
             'brand',
             'model',
         ])
             ->where(function ($query) use ($sale) {
-                $query->where('status', 'AVAILABLE')
+                $query->where('status', Vehicle::STATUS_AVAILABLE)
                     ->orWhere('id', $sale->vehicle_id);
             })
             ->orderBy('stock_code')
             ->get();
 
-        return view(
-            'admin.sales.edit',
-            compact('sale', 'customers', 'vehicles')
-        );
+        return view('admin.sales.edit', compact('sale', 'customers', 'vehicles'));
     }
 
     /**
-     * Memperbarui transaksi penjualan yang ada.
+     * Memperbarui data transaksi penjualan yang telah ada.
+     *
+     * Mengatur penukaran unit kendaraan jika admin mengganti pilihan unit,
+     * serta mengembalikan status unit lama menjadi AVAILABLE.
      *
      * @param Request $request
      * @param Sale $sale
@@ -184,9 +190,9 @@ class SaleController extends Controller
      */
     public function update(Request $request, Sale $sale): RedirectResponse
     {
-        if ($sale->status === 'CANCELLED') {
+        if ($sale->status === Sale::STATUS_CANCELLED) {
             return back()->withErrors([
-                'sale' => 'Transaksi yang sudah dibatalkan tidak dapat diedit.',
+                'sale' => 'Transaksi yang sudah berstatus CANCELLED tidak dapat diedit kembali.',
             ]);
         }
 
@@ -204,31 +210,32 @@ class SaleController extends Controller
             $oldVehicle = Vehicle::where('id', $sale->vehicle_id)->lockForUpdate()->firstOrFail();
             $newVehicle = Vehicle::where('id', $validated['vehicle_id'])->lockForUpdate()->firstOrFail();
 
-            // Jika unit kendaraan diganti
+            // Jika admin mengganti pilihan unit kendaraan pada transaksi ini
             if ($oldVehicle->id !== $newVehicle->id) {
-                if ($newVehicle->status !== 'AVAILABLE') {
-                    abort(422, 'Kendaraan baru sudah tidak tersedia.');
+                if ($newVehicle->status !== Vehicle::STATUS_AVAILABLE) {
+                    abort(422, 'Unit kendaraan pengganti yang dipilih sudah tidak berstatus AVAILABLE.');
                 }
 
-                // Kembalikan kendaraan lama ke status AVAILABLE
-                if (in_array($sale->status, ['BOOKED', 'DRAFT'])) {
-                    $oldVehicle->update(['status' => 'AVAILABLE']);
+                // Kembalikan unit kendaraan lama ke status AVAILABLE jika sebelumnya di-reserve/draft
+                if (in_array($sale->status, [Sale::STATUS_BOOKED, Sale::STATUS_DRAFT])) {
+                    $oldVehicle->update(['status' => Vehicle::STATUS_AVAILABLE]);
                 }
             }
 
-            if ($newVehicle->id !== $sale->vehicle_id && $newVehicle->status !== 'AVAILABLE') {
-                abort(422, 'Kendaraan sudah tidak tersedia.');
+            if ($newVehicle->id !== $sale->vehicle_id && $newVehicle->status !== Vehicle::STATUS_AVAILABLE) {
+                abort(422, 'Kendaraan yang dipilih sudah tidak tersedia.');
             }
 
-            $vehiclePrice = $newVehicle->selling_price;
-            $discount     = $validated['discount'] ?? 0;
+            $vehiclePrice = (float) $newVehicle->selling_price;
+            $discount     = (float) ($validated['discount'] ?? 0);
 
             if ($discount > $vehiclePrice) {
-                abort(422, 'Discount tidak boleh lebih besar dari harga kendaraan.');
+                abort(422, 'Nominal diskon tidak boleh melebihi harga kendaraan.');
             }
 
             $finalPrice = $vehiclePrice - $discount;
 
+            // Perbarui data transaksi
             $sale->update([
                 'customer_id'   => $validated['customer_id'],
                 'vehicle_id'    => $newVehicle->id,
@@ -241,48 +248,50 @@ class SaleController extends Controller
                 'notes'         => $validated['notes'] ?? null,
             ]);
 
-            // Sinkronisasi status unit kendaraan
-            if ($validated['status'] === 'COMPLETED') {
-                $newVehicle->update(['status' => 'SOLD']);
-            } elseif ($validated['status'] === 'BOOKED') {
-                $newVehicle->update(['status' => 'RESERVED']);
-            } elseif (in_array($validated['status'], ['DRAFT', 'CANCELLED'])) {
-                $newVehicle->update(['status' => 'AVAILABLE']);
+            // Sinkronisasi status unit kendaraan baru sesuai status transaksi teranyar
+            if ($validated['status'] === Sale::STATUS_COMPLETED) {
+                $newVehicle->update(['status' => Vehicle::STATUS_SOLD]);
+            } elseif ($validated['status'] === Sale::STATUS_BOOKED) {
+                $newVehicle->update(['status' => Vehicle::STATUS_RESERVED]);
+            } elseif (in_array($validated['status'], [Sale::STATUS_DRAFT, Sale::STATUS_CANCELLED])) {
+                $newVehicle->update(['status' => Vehicle::STATUS_AVAILABLE]);
             }
         });
 
         return redirect()
             ->route('admin.sales.index')
-            ->with('success', 'Penjualan berhasil diperbarui.');
+            ->with('success', 'Data transaksi penjualan berhasil diperbarui.');
     }
 
     /**
-     * Membatalkan transaksi penjualan (Mengembalikan status kendaraan ke AVAILABLE).
+     * Membatalkan transaksi penjualan secara resmi.
+     * Mengembalikan status unit kendaraan terkait menjadi 'AVAILABLE' agar dapat dijual kembali.
      *
      * @param Sale $sale
      * @return RedirectResponse
      */
     public function cancel(Sale $sale): RedirectResponse
     {
-        if ($sale->status === 'CANCELLED') {
+        if ($sale->status === Sale::STATUS_CANCELLED) {
             return back()->withErrors([
-                'sale' => 'Transaksi sudah dibatalkan.',
+                'sale' => 'Transaksi ini memang sudah dalam status dibatalkan (CANCELLED).',
             ]);
         }
 
         DB::transaction(function () use ($sale) {
             $vehicle = Vehicle::where('id', $sale->vehicle_id)->lockForUpdate()->firstOrFail();
 
-            if ($sale->status === 'COMPLETED') {
-                abort(422, 'Transaksi yang sudah COMPLETED tidak dapat dibatalkan.');
+            if ($sale->status === Sale::STATUS_COMPLETED) {
+                abort(422, 'Transaksi yang sudah lunas (COMPLETED) tidak dapat dibatalkan secara langsung.');
             }
 
-            $sale->update(['status' => 'CANCELLED']);
-            $vehicle->update(['status' => 'AVAILABLE']);
+            // Ubah status transaksi menjadi CANCELLED dan kembalikan unit ke AVAILABLE
+            $sale->update(['status' => Sale::STATUS_CANCELLED]);
+            $vehicle->update(['status' => Vehicle::STATUS_AVAILABLE]);
         });
 
         return redirect()
             ->route('admin.sales.index')
-            ->with('success', 'Penjualan berhasil dibatalkan.');
+            ->with('success', 'Transaksi penjualan berhasil dibatalkan dan status unit telah dikembalikan ke AVAILABLE.');
     }
 }

@@ -9,37 +9,41 @@ use App\Models\Vehicle;
 use Illuminate\View\View;
 
 /**
- * Controller untuk Dashboard Utama Panel Admin Suja Mobilindo.
+ * Controller Rangkuman Eksekutif Dashboard Utama Panel Admin.
+ *
+ * Mengagregasi metrik statistik penting showroom: jumlah stok kendaraan berdasarkan status,
+ * total pelanggan terdaftar, 5 riwayat penjualan terbaru, dan 6 unit kendaraan terkini.
  */
 class DashboardController extends Controller
 {
     /**
-     * Menampilkan rangkuman statistik unit, pelanggan, transaksi penjualan terbaru, dan stok kendaraan terbaru.
+     * Menampilkan halaman ikhtisar statistik dashboard admin.
      *
      * @return View
      */
     public function index(): View
     {
-        // 1. Perhitungan Statistik Stok Kendaraan
+        // 1. Agregasi Statistik Inventaris Kendaraan Showroom
         $totalVehicles     = Vehicle::count();
-        $availableVehicles = Vehicle::where('status', 'AVAILABLE')->count();
-        $soldVehicles      = Vehicle::where('status', 'SOLD')->count();
-        $reservedVehicles  = Vehicle::where('status', 'RESERVED')->count();
+        $availableVehicles = Vehicle::where('status', Vehicle::STATUS_AVAILABLE)->count();
+        $soldVehicles      = Vehicle::where('status', Vehicle::STATUS_SOLD)->count();
+        $reservedVehicles  = Vehicle::where('status', Vehicle::STATUS_RESERVED)->count();
 
-        // 2. Total Pelanggan Terdaftar
+        // 2. Total Pelanggan Aktif Terdaftar
         $totalCustomers = Customer::count();
 
-        // 3. Transaksi Penjualan Terbaru (5 Transaksi Terakhir)
+        // 3. 5 Transaksi Penjualan Terakhir (Eager load data pelanggan dan spesifikasi kendaraan)
         $recentSales = Sale::with([
             'customer',
             'vehicle.brand',
             'vehicle.model',
         ])
             ->latest('sale_date')
+            ->latest('id')
             ->take(5)
             ->get();
 
-        // 4. Daftar Stok Kendaraan Terbaru (6 Unit Terakhir)
+        // 4. 6 Unit Kendaraan Terbaru yang Masuk ke Showroom
         $vehicles = Vehicle::with([
             'brand',
             'model',
@@ -49,7 +53,7 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        // 5. Render Halaman Dashboard Admin
+        // 5. Render Tampilan View Dashboard
         return view('admin.dashboard.index', compact(
             'totalVehicles',
             'availableVehicles',
