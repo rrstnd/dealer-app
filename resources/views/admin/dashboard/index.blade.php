@@ -18,8 +18,8 @@
     </p>
 </div>
 
-{{-- 5 STATISTIC CARDS (CARITA LUXURY STYLE) --}}
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 mb-8">
+{{-- 4 STATISTIC CARDS (CARITA LUXURY STYLE) --}}
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
 
     {{-- 1. TOTAL KENDARAAN --}}
     <div class="bg-white border border-zinc-200 p-5 shadow-xs hover:border-zinc-900 transition duration-200">
@@ -109,28 +109,6 @@
         </div>
     </div>
 
-    {{-- 5. TOTAL CUSTOMERS --}}
-    <div class="bg-white border border-zinc-200 p-5 shadow-xs hover:border-zinc-900 transition duration-200">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                    Data Pelanggan
-                </p>
-                <p class="text-2xl sm:text-3xl font-light text-zinc-900 mt-2 tracking-tight">
-                    {{ number_format($totalCustomers) }}
-                </p>
-            </div>
-            <div class="w-10 h-10 bg-zinc-100 text-zinc-800 flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-            </div>
-        </div>
-        <div class="mt-3 pt-3 border-t border-zinc-100 text-[10px] text-zinc-400 font-mono-code uppercase">
-            Kontak terdaftar
-        </div>
-    </div>
-
 </div>
 
 {{-- PENJUALAN TERBARU (TRANSAKSI) --}}
@@ -141,7 +119,7 @@
             <div class="flex items-center gap-2">
                 <span class="w-1.5 h-1.5 bg-[#881337]"></span>
                 <h2 class="text-sm font-bold tracking-[0.15em] text-zinc-900 uppercase">
-                    Transaksi Penjualan Terbaru
+                    In Out Kendaraan Terbaru
                 </h2>
             </div>
             <p class="text-xs text-zinc-400 mt-0.5">
@@ -156,48 +134,48 @@
         </a>
     </div>
 
-    @if($recentSales->count())
+    @if($recentLogs->count())
         <div class="overflow-x-auto">
             <table class="w-full text-xs">
                 <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-500 uppercase tracking-wider text-[10px] font-bold">
                     <tr>
-                        <th class="text-left px-6 py-3.5">No. Invoice</th>
-                        <th class="text-left px-6 py-3.5">Pelanggan</th>
-                        <th class="text-left px-6 py-3.5">Unit Kendaraan</th>
-                        <th class="text-left px-6 py-3.5">Harga Akhir</th>
-                        <th class="text-left px-6 py-3.5">Status Transaksi</th>
+                        <th class="text-left px-6 py-3.5">Status Mutasi</th>
+                        <th class="text-left px-6 py-3.5">Tanggal & Waktu</th>
+                        <th class="text-left px-6 py-3.5">Kode Stok</th>
+                        <th class="text-left px-6 py-3.5">Nama Kendaraan</th>
+                        <th class="text-left px-6 py-3.5">Harga Jual</th>
+                        <th class="text-left px-6 py-3.5">Keterangan</th>
                     </tr>
                 </thead>
 
                 <tbody class="divide-y divide-zinc-100">
-                    @foreach($recentSales as $sale)
+                    @foreach($recentLogs as $log)
                         <tr class="hover:bg-zinc-50/80 transition">
+                            <td class="px-6 py-4">
+                                @if($log->type === 'IN')
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase border border-emerald-200 bg-emerald-50 text-emerald-800">
+                                        🟢 IN (DITAMBAH)
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase border border-rose-200 bg-rose-50 text-rose-800">
+                                        🔴 OUT (DIHAPUS)
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 font-mono-code text-zinc-700">
+                                {{ $log->action_at?->format('d/m/Y H:i') }}
+                            </td>
                             <td class="px-6 py-4 font-mono-code font-bold text-zinc-900">
-                                {{ $sale->invoice_number }}
+                                {{ $log->stock_code }}
                             </td>
-                            <td class="px-6 py-4 text-zinc-700 font-medium">
-                                {{ $sale->customer->name ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4 text-zinc-800">
-                                <span class="font-bold">{{ $sale->vehicle->brand->name ?? '-' }}</span>
-                                <span>{{ $sale->vehicle->model->name ?? '-' }}</span>
+                            <td class="px-6 py-4 font-bold text-zinc-800 uppercase">
+                                {{ $log->vehicle_name }}
                             </td>
                             <td class="px-6 py-4 font-bold text-zinc-950">
-                                Rp {{ number_format($sale->final_price, 0, ',', '.') }}
+                                Rp {{ number_format($log->price, 0, ',', '.') }}
                             </td>
-                            <td class="px-6 py-4">
-                                @php
-                                    $badge = match($sale->status) {
-                                        'COMPLETED' => ['bg' => 'bg-emerald-50 text-emerald-800 border-emerald-200', 'label' => 'SELESAI'],
-                                        'BOOKED'    => ['bg' => 'bg-amber-50 text-amber-800 border-amber-200', 'label' => 'BOOKING'],
-                                        'DRAFT'     => ['bg' => 'bg-zinc-100 text-zinc-700 border-zinc-300', 'label' => 'DRAFT'],
-                                        'CANCELLED' => ['bg' => 'bg-rose-50 text-rose-800 border-rose-200', 'label' => 'DIBATALKAN'],
-                                        default     => ['bg' => 'bg-zinc-100 text-zinc-700 border-zinc-300', 'label' => $sale->status],
-                                    };
-                                @endphp
-                                <span class="inline-block px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase border {{ $badge['bg'] }}">
-                                    {{ $badge['label'] }}
-                                </span>
+                            <td class="px-6 py-4 text-zinc-500 italic">
+                                {{ $log->notes ?? '-' }}
                             </td>
                         </tr>
                     @endforeach
@@ -207,10 +185,10 @@
     @else
         <div class="px-6 py-12 text-center text-zinc-400">
             <svg class="w-8 h-8 mx-auto text-zinc-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
             </svg>
-            <p class="text-xs font-bold uppercase tracking-wider text-zinc-700">Belum Ada Transaksi Penjualan</p>
-            <p class="text-[11px] text-zinc-400 mt-1">Transaksi penjualan baru akan muncul otomatis di tabel ini.</p>
+            <p class="text-xs font-bold uppercase tracking-wider text-zinc-700">Belum Ada Mutasi In Out Kendaraan</p>
+            <p class="text-[11px] text-zinc-400 mt-1">Riwayat kendaraan yang ditambah/dihapus akan otomatis tercatat di sini.</p>
         </div>
     @endif
 

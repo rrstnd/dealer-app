@@ -32,13 +32,8 @@ class DashboardController extends Controller
         // 2. Total Pelanggan Aktif Terdaftar
         $totalCustomers = Customer::count();
 
-        // 3. 5 Transaksi Penjualan Terakhir (Eager load data pelanggan dan spesifikasi kendaraan)
-        $recentSales = Sale::with([
-            'customer',
-            'vehicle.brand',
-            'vehicle.model',
-        ])
-            ->latest('sale_date')
+        // 3. 5 Mutasi In Out Kendaraan Terbaru
+        $recentLogs = \App\Models\VehicleLog::latest('action_at')
             ->latest('id')
             ->take(5)
             ->get();
@@ -60,7 +55,7 @@ class DashboardController extends Controller
             'soldVehicles',
             'reservedVehicles',
             'totalCustomers',
-            'recentSales',
+            'recentLogs',
             'vehicles'
         ));
     }

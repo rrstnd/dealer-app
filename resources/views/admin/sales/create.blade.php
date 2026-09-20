@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Input Penjualan Baru')
-@section('page-title', 'Transaksi Penjualan')
+@section('page-title', 'In Out Kendaraan')
 
 @section('content')
 <div class="max-w-4xl space-y-6">

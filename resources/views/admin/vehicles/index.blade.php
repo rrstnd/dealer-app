@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Katalog Kendaraan')
-@section('page-title', 'Katalog Kendaraan')
+@section('title', 'Upload Kendaraan')
+@section('page-title', 'Upload Kendaraan')
 
 @section('content')
 
@@ -12,7 +12,7 @@
                 <span class="text-xs font-mono-code text-rose-600 font-bold uppercase tracking-widest">INVENTARIS UNIT</span>
             </div>
             <h1 class="text-xl sm:text-2xl font-light tracking-[0.15em] text-zinc-900 uppercase">
-                KATALOG KENDARAAN DEALER
+                UPLOAD KENDARAAN DEALER
             </h1>
             <p class="text-xs text-zinc-500 mt-1">
                 Kelola seluruh data unit mobil dan motor yang siap dipasarkan di showroom Suja Mobilindo.

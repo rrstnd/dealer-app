@@ -10,7 +10,7 @@
         <a href="{{ route('admin.vehicles.index') }}"
            class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-900 transition mb-2">
             <span>←</span>
-            <span>Kembali ke Katalog Kendaraan</span>
+            <span>Kembali ke Upload Kendaraan</span>
         </a>
         <div class="flex items-center gap-3">
             <h1 class="text-xl sm:text-2xl font-light tracking-[0.15em] text-zinc-900 uppercase">

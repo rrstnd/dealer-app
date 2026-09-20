@@ -4,9 +4,8 @@
         {{-- BRANDING & HEADER --}}
         <div class="text-center space-y-3">
             <a href="{{ route('home') }}" class="inline-flex items-center gap-3 group">
-                <div class="w-12 h-12 bg-[#881337] flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-black/40 group-hover:scale-105 transition duration-200">
-                    S
-                </div>
+                <img src="{{ asset('images/logo.png') }}" alt="SUJA MOBILINDO"
+                     class="w-16 h-16 rounded-full object-cover shadow-xl shadow-black/40 group-hover:scale-105 transition duration-200 border border-zinc-800">
             </a>
             <div>
                 <h1 class="text-2xl font-light text-white tracking-[0.2em] uppercase">

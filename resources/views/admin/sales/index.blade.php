@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Transaksi Penjualan')
-@section('page-title', 'Transaksi Penjualan')
+@section('title', 'In Out Kendaraan')
+@section('page-title', 'In Out Kendaraan')
 
 @section('content')
 
@@ -9,22 +9,22 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <span class="text-xs font-mono-code text-rose-600 font-bold uppercase tracking-widest">FINANCIAL & SALES</span>
+                <span class="text-xs font-mono-code text-rose-600 font-bold uppercase tracking-widest">MUTASI INVENTARIS</span>
             </div>
             <h1 class="text-xl sm:text-2xl font-light tracking-[0.15em] text-zinc-900 uppercase">
-                TRANSAKSI PENJUALAN SHOWROOM
+                LOG IN OUT KENDARAAN
             </h1>
             <p class="text-xs text-zinc-500 mt-1">
-                Daftar rekaman transaksi jual-beli kendaraan, surat perjanjian, dan status pembayaran.
+                Catatan riwayat kendaraan yang ditambah (IN) dan dihapus (OUT) dari sistem website showroom.
             </p>
         </div>
 
-        <a href="{{ route('admin.sales.create') }}"
+        <a href="{{ route('admin.vehicles.create') }}"
            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition shadow-xs">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            <span>Input Transaksi Baru</span>
+            <span>Upload Kendaraan Baru</span>
         </a>
     </div>
 
@@ -47,111 +47,166 @@
         </div>
     @endif
 
-    {{-- SALES TABLE --}}
+    {{-- SEARCH & MONTHLY FILTER BAR --}}
+    <div class="bg-white border border-zinc-200 p-5 mb-6 shadow-xs">
+        <form method="GET" action="{{ route('admin.sales.index') }}">
+            <div class="flex flex-col lg:flex-row gap-4">
+
+                {{-- SEARCH INPUT --}}
+                <div class="flex-1">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                        Pencarian Kendaraan
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </span>
+                        <input type="text"
+                               name="search"
+                               value="{{ request('search') }}"
+                               placeholder="Cari Kode Stok, Nama Kendaraan, atau Plat Nomor..."
+                               class="w-full pl-9 pr-4 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-800 text-xs focus:bg-white focus:border-zinc-900 focus:outline-none transition">
+                    </div>
+                </div>
+
+                {{-- FILTER TIPE MUTASI (IN / OUT) --}}
+                <div class="w-full lg:w-44">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                        Status Mutasi
+                    </label>
+                    <select name="type"
+                            class="w-full px-3 py-2.5 bg-white border border-zinc-300 text-zinc-800 text-xs focus:outline-none focus:border-zinc-900 transition">
+                        <option value="">Semua Status</option>
+                        <option value="IN" {{ request('type') == 'IN' ? 'selected' : '' }}>🟢 IN (Kendaraan Masuk)</option>
+                        <option value="OUT" {{ request('type') == 'OUT' ? 'selected' : '' }}>🔴 OUT (Kendaraan Keluar)</option>
+                    </select>
+                </div>
+
+                {{-- FILTER BULAN --}}
+                <div class="w-full lg:w-44">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                        Filter Bulan
+                    </label>
+                    <select name="month"
+                            class="w-full px-3 py-2.5 bg-white border border-zinc-300 text-zinc-800 text-xs focus:outline-none focus:border-zinc-900 transition">
+                        <option value="">Semua Bulan</option>
+                        @php
+                            $months = [
+                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                            ];
+                        @endphp
+                        @foreach ($months as $num => $name)
+                            <option value="{{ sprintf('%02d', $num) }}" {{ request('month') == sprintf('%02d', $num) ? 'selected' : '' }}>
+                                {{ $name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- FILTER TAHUN --}}
+                <div class="w-full lg:w-36">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                        Filter Tahun
+                    </label>
+                    <select name="year"
+                            class="w-full px-3 py-2.5 bg-white border border-zinc-300 text-zinc-800 text-xs focus:outline-none focus:border-zinc-900 transition">
+                        <option value="">Semua Tahun</option>
+                        @for ($y = date('Y'); $y >= 2023; $y--)
+                            <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>
+                                {{ $y }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+
+                {{-- ACTION BUTTONS --}}
+                <div class="flex items-end gap-2">
+                    <button type="submit"
+                            class="px-5 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition flex items-center gap-1.5 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                        </svg>
+                        <span>Filter</span>
+                    </button>
+
+                    @if (request()->hasAny(['search', 'type', 'month', 'year']))
+                        <a href="{{ route('admin.sales.index') }}"
+                           class="px-4 py-2.5 bg-zinc-100 hover:bg-rose-50 text-zinc-700 hover:text-rose-700 border border-zinc-200 hover:border-rose-200 text-xs font-bold uppercase tracking-wider transition flex items-center gap-1">
+                            <span>✕</span>
+                            <span>Reset</span>
+                        </a>
+                    @endif
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    {{-- LOG TABLE --}}
     <div class="bg-white border border-zinc-200 shadow-xs overflow-hidden">
-        @if ($sales->count())
+        @if ($logs->count())
             <div class="overflow-x-auto">
                 <table class="w-full text-xs">
                     <thead class="bg-zinc-100/90 border-b border-zinc-200 text-zinc-600 uppercase tracking-wider text-[10px] font-bold">
                         <tr>
-                            <th class="px-5 py-3.5 text-left">No. Invoice</th>
-                            <th class="px-5 py-3.5 text-left">Tanggal</th>
-                            <th class="px-5 py-3.5 text-left">Pelanggan</th>
-                            <th class="px-5 py-3.5 text-left">Kendaraan</th>
-                            <th class="px-5 py-3.5 text-left">Harga Unit</th>
-                            <th class="px-5 py-3.5 text-left">Diskon</th>
-                            <th class="px-5 py-3.5 text-left">Total Akhir</th>
-                            <th class="px-5 py-3.5 text-left">Status</th>
-                            <th class="px-5 py-3.5 text-right">Aksi</th>
+                            <th class="px-5 py-3.5 text-left">Status Mutasi</th>
+                            <th class="px-5 py-3.5 text-left">Tanggal & Waktu</th>
+                            <th class="px-5 py-3.5 text-left">Kode Stok</th>
+                            <th class="px-5 py-3.5 text-left">Nama Kendaraan</th>
+                            <th class="px-5 py-3.5 text-left">Plat Nomor</th>
+                            <th class="px-5 py-3.5 text-left">Harga Jual</th>
+                            <th class="px-5 py-3.5 text-left">Petugas</th>
+                            <th class="px-5 py-3.5 text-left">Keterangan</th>
                         </tr>
                     </thead>
 
                     <tbody class="divide-y divide-zinc-100">
-                        @foreach ($sales as $sale)
+                        @foreach ($logs as $log)
                             <tr class="hover:bg-zinc-50/80 transition">
-                                <td class="px-5 py-4 font-mono-code font-bold text-zinc-900">
-                                    <a href="{{ route('admin.sales.show', $sale) }}" class="hover:text-rose-600 transition underline decoration-zinc-300">
-                                        {{ $sale->invoice_number }}
-                                    </a>
-                                </td>
-
-                                <td class="px-5 py-4 font-mono-code text-zinc-600">
-                                    {{ $sale->sale_date?->format('d/m/Y') }}
-                                </td>
-
-                                <td class="px-5 py-4 text-zinc-800 font-medium">
-                                    {{ $sale->customer->name ?? '-' }}
-                                </td>
-
                                 <td class="px-5 py-4">
-                                    <div class="font-bold text-zinc-900 uppercase">
-                                        {{ $sale->vehicle->brand->name ?? '-' }} {{ $sale->vehicle->model->name ?? '-' }}
-                                    </div>
-                                    <div class="text-[11px] font-mono-code text-zinc-400">
-                                        {{ $sale->vehicle->stock_code ?? '-' }}
-                                    </div>
-                                </td>
-
-                                <td class="px-5 py-4 font-mono-code text-zinc-700">
-                                    Rp {{ number_format($sale->vehicle_price, 0, ',', '.') }}
-                                </td>
-
-                                <td class="px-5 py-4 font-mono-code text-rose-600">
-                                    @if($sale->discount > 0)
-                                        - Rp {{ number_format($sale->discount, 0, ',', '.') }}
+                                    @if ($log->type === 'IN')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase border border-emerald-200 bg-emerald-50 text-emerald-800">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                            IN (DITAMBAH)
+                                        </span>
                                     @else
-                                        -
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase border border-rose-200 bg-rose-50 text-rose-800">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                                            OUT (DIHAPUS)
+                                        </span>
                                     @endif
                                 </td>
 
+                                <td class="px-5 py-4 font-mono-code text-zinc-700">
+                                    {{ $log->action_at?->format('d/m/Y H:i') }}
+                                </td>
+
+                                <td class="px-5 py-4 font-mono-code font-bold text-zinc-900">
+                                    {{ $log->stock_code }}
+                                </td>
+
+                                <td class="px-5 py-4 font-bold text-zinc-900 uppercase">
+                                    {{ $log->vehicle_name }}
+                                </td>
+
+                                <td class="px-5 py-4 font-mono-code text-zinc-600">
+                                    {{ $log->license_plate ?? '-' }}
+                                </td>
+
                                 <td class="px-5 py-4 font-mono-code font-bold text-zinc-950">
-                                    Rp {{ number_format($sale->final_price, 0, ',', '.') }}
+                                    Rp {{ number_format($log->price, 0, ',', '.') }}
                                 </td>
 
-                                <td class="px-5 py-4">
-                                    @php
-                                        $badge = match($sale->status) {
-                                            'COMPLETED' => ['bg' => 'bg-emerald-50 text-emerald-800 border-emerald-200', 'label' => 'SELESAI'],
-                                            'BOOKED'    => ['bg' => 'bg-amber-50 text-amber-800 border-amber-200', 'label' => 'BOOKING'],
-                                            'DRAFT'     => ['bg' => 'bg-zinc-100 text-zinc-700 border-zinc-300', 'label' => 'DRAFT'],
-                                            'CANCELLED' => ['bg' => 'bg-rose-50 text-rose-800 border-rose-200', 'label' => 'BATAL'],
-                                            default     => ['bg' => 'bg-zinc-100 text-zinc-700 border-zinc-300', 'label' => $sale->status],
-                                        };
-                                    @endphp
-                                    <span class="inline-block px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase border {{ $badge['bg'] }}">
-                                        {{ $badge['label'] }}
-                                    </span>
+                                <td class="px-5 py-4 text-zinc-700">
+                                    {{ $log->user_name ?? 'Admin' }}
                                 </td>
 
-                                <td class="px-5 py-4 text-right">
-                                    <div class="inline-flex items-center gap-1.5 justify-end">
-                                        <a href="{{ route('admin.sales.show', $sale) }}"
-                                           class="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider border border-zinc-200 bg-white hover:bg-zinc-100 text-zinc-700 transition"
-                                           title="Detail Transaksi">
-                                            Detail
-                                        </a>
-
-                                        <a href="{{ route('admin.sales.edit', $sale) }}"
-                                           class="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider border border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 transition"
-                                           title="Edit Transaksi">
-                                            Edit
-                                        </a>
-
-                                        @if ($sale->status !== 'CANCELLED')
-                                            <form action="{{ route('admin.sales.cancel', $sale) }}"
-                                                  method="POST"
-                                                  onsubmit="return confirm('Apakah Anda yakin ingin membatalkan transaksi {{ $sale->invoice_number }}?')"
-                                                  class="inline-block">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                        class="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 transition cursor-pointer"
-                                                        title="Batalkan Transaksi">
-                                                    Batal
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
+                                <td class="px-5 py-4 text-zinc-500 italic">
+                                    {{ $log->notes ?? '-' }}
                                 </td>
                             </tr>
                         @endforeach
@@ -161,26 +216,26 @@
         @else
             <div class="py-16 text-center text-zinc-400">
                 <svg class="w-10 h-10 mx-auto text-zinc-300 mb-2 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                 </svg>
-                <p class="text-xs font-bold uppercase tracking-wider text-zinc-700">Belum Ada Transaksi Penjualan</p>
-                <p class="text-[11px] text-zinc-400 mt-1">Gunakan tombol "Input Transaksi Baru" untuk mencatat penjualan unit.</p>
-                <a href="{{ route('admin.sales.create') }}"
+                <p class="text-xs font-bold uppercase tracking-wider text-zinc-700">Belum Ada Riwayat In Out Kendaraan</p>
+                <p class="text-[11px] text-zinc-400 mt-1">Riwayat akan bertambah secara otomatis setiap kali kendaraan diupload atau dihapus.</p>
+                <a href="{{ route('admin.vehicles.create') }}"
                    class="inline-block mt-4 px-5 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition">
-                    + Input Penjualan Baru
+                    + Upload Kendaraan Baru
                 </a>
             </div>
         @endif
     </div>
 
     {{-- PAGINATION --}}
-    @if ($sales->hasPages())
+    @if ($logs->hasPages())
         <div class="mt-6 bg-white border border-zinc-200 px-5 py-4 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div class="text-xs text-zinc-500 font-mono-code uppercase">
-                Menampilkan <span class="font-bold text-zinc-900">{{ $sales->firstItem() }}</span> - <span class="font-bold text-zinc-900">{{ $sales->lastItem() }}</span> dari <span class="font-bold text-zinc-900">{{ $sales->total() }}</span> transaksi
+                Menampilkan <span class="font-bold text-zinc-900">{{ $logs->firstItem() }}</span> - <span class="font-bold text-zinc-900">{{ $logs->lastItem() }}</span> dari <span class="font-bold text-zinc-900">{{ $logs->total() }}</span> log kendaraan
             </div>
             <div>
-                {{ $sales->links() }}
+                {{ $logs->links() }}
             </div>
         </div>
     @endif

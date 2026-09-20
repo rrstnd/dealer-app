@@ -25,18 +25,37 @@ class SaleController extends Controller
      *
      * @return View
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $sales = Sale::with([
-            'customer',
-            'vehicle.brand',
-            'vehicle.model',
-        ])
-            ->latest('sale_date')
-            ->latest('id')
-            ->paginate(15);
+        $query = \App\Models\VehicleLog::query();
 
-        return view('admin.sales.index', compact('sales'));
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('month')) {
+            $query->whereMonth('action_at', $request->month);
+        }
+
+        if ($request->filled('year')) {
+            $query->whereYear('action_at', $request->year);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('stock_code', 'like', "%{$search}%")
+                  ->orWhere('vehicle_name', 'like', "%{$search}%")
+                  ->orWhere('license_plate', 'like', "%{$search}%");
+            });
+        }
+
+        $logs = $query->latest('action_at')
+            ->latest('id')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.sales.index', compact('logs'));
     }
 
     /**

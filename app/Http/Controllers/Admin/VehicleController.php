@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Vehicle;
+use App\Models\VehicleLog;
 use App\Models\VehicleModel;
 use App\Models\VehicleType;
 use Illuminate\Http\RedirectResponse;
@@ -159,7 +160,7 @@ class VehicleController extends Controller
             }
 
             // D. Pembuatan Record Kendaraan Baru
-            return Vehicle::create([
+            $newVehicle = Vehicle::create([
                 'stock_code'        => $this->generateNextStockCode(),
                 'vehicle_type_id'   => $vehicleType->id,
                 'brand_id'          => $brand->id,
@@ -180,6 +181,21 @@ class VehicleController extends Controller
                 'status'            => $validated['status'],
                 'description'       => $validated['description'] ?? null,
             ]);
+
+            // E. Catat Log IN (Kendaraan Tambah/Masuk ke Website)
+            VehicleLog::create([
+                'type'          => 'IN',
+                'vehicle_id'    => $newVehicle->id,
+                'stock_code'    => $newVehicle->stock_code,
+                'vehicle_name'  => trim($brand->name . ' ' . $vehicleModel->name . ' (' . $newVehicle->year . ')'),
+                'license_plate' => $newVehicle->license_plate,
+                'price'         => $newVehicle->selling_price,
+                'user_name'     => auth()->user()->name ?? 'Admin',
+                'action_at'     => now(),
+                'notes'         => 'Kendaraan ditambahkan ke website.',
+            ]);
+
+            return $newVehicle;
         });
 
         return redirect()
@@ -346,6 +362,21 @@ class VehicleController extends Controller
                 ->route('admin.vehicles.index')
                 ->with('error', 'Kendaraan yang sudah SOLD tidak dapat dihapus demi integritas data laporan.');
         }
+
+        $vehicleName = trim(($vehicle->brand->name ?? '') . ' ' . ($vehicle->model->name ?? '') . ' (' . $vehicle->year . ')');
+
+        // Catat Log OUT (Kendaraan Hapus/Keluar dari Website)
+        VehicleLog::create([
+            'type'          => 'OUT',
+            'vehicle_id'    => null,
+            'stock_code'    => $vehicle->stock_code,
+            'vehicle_name'  => $vehicleName ?: 'Kendaraan ' . $vehicle->stock_code,
+            'license_plate' => $vehicle->license_plate,
+            'price'         => $vehicle->selling_price,
+            'user_name'     => auth()->user()->name ?? 'Admin',
+            'action_at'     => now(),
+            'notes'         => 'Kendaraan dihapus dari website.',
+        ]);
 
         $vehicle->delete();
 

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Edit Transaksi Penjualan: ' . $sale->invoice_number)
-@section('page-title', 'Transaksi Penjualan')
+@section('page-title', 'In Out Kendaraan')
 
 @section('content')
 <div class="max-w-4xl space-y-6">

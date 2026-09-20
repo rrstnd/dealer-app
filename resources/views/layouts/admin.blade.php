@@ -18,24 +18,44 @@
     </style>
 </head>
 
-<body class="bg-zinc-100 text-zinc-800 antialiased selection:bg-[#881337] selection:text-white">
+<body class="bg-zinc-100 text-zinc-800 antialiased selection:bg-[#881337] selection:text-white" x-data="{ sidebarOpen: false }">
 
-    <div class="min-h-screen flex">
+    <div class="min-h-screen flex relative overflow-x-hidden">
 
-        {{-- SIDEBAR --}}
-        <aside class="w-64 min-w-64 shrink-0 bg-zinc-950 text-zinc-300 flex flex-col border-r border-zinc-800/80">
+        {{-- MOBILE / TABLET OVERLAY BACKDROP --}}
+        <div x-show="sidebarOpen"
+             x-transition:enter="transition-opacity ease-linear duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="sidebarOpen = false"
+             class="fixed inset-0 bg-zinc-950/80 backdrop-blur-xs z-40 lg:hidden"
+             style="display: none;">
+        </div>
+
+        {{-- SIDEBAR (RESPONSIVE: SLIDE-OVER ON MOBILE/TABLET, PERMANENT ON DESKTOP) --}}
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+               class="fixed inset-y-0 left-0 z-50 w-64 min-w-64 bg-zinc-950 text-zinc-300 flex flex-col border-r border-zinc-800/80 transition-transform duration-300 ease-in-out lg:static lg:z-auto">
 
             {{-- LOGO BRANDING --}}
-            <div class="h-20 flex items-center px-6 border-b border-zinc-800/80 bg-black/40">
+            <div class="h-20 flex items-center justify-between px-6 border-b border-zinc-800/80 bg-black/40">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 group">
-                    <div class="w-9 h-9 bg-[#881337] text-white font-black text-base flex items-center justify-center tracking-wider shadow-md group-hover:scale-105 transition duration-200">
-                        S
-                    </div>
+                    <img src="{{ asset('images/logo.png') }}" alt="SUJA MOBILINDO"
+                         class="w-10 h-10 rounded-full object-cover shadow-sm shrink-0 border border-zinc-800 group-hover:scale-105 transition duration-200">
                     <div>
                         <span class="text-sm font-black tracking-[0.2em] text-white uppercase block leading-none">SUJA <span class="text-zinc-400 font-light">MOBILINDO</span></span>
                         <span class="block text-[9px] font-bold uppercase tracking-[0.2em] text-rose-500 mt-1">PORTAL ADMIN</span>
                     </div>
                 </a>
+
+                {{-- MOBILE CLOSE BUTTON --}}
+                <button @click="sidebarOpen = false" class="lg:hidden text-zinc-400 hover:text-white p-1 rounded-md transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
 
             {{-- NAVIGATION --}}
@@ -60,34 +80,16 @@
                     <svg class="w-4 h-4 {{ request()->routeIs('admin.vehicles*') ? 'text-rose-500' : 'text-zinc-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.4-1.7-1.1-2.2l-3.4-2.3c-.5-.4-1.2-.6-1.9-.6H7.4c-.7 0-1.4.2-1.9.6L2.1 10.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2m15 0a3 3 0 11-6 0m6 0a3 3 0 10-6 0M4 17a3 3 0 11-6 0m6 0a3 3 0 10-6 0M5 9l2-4h10l2 4"/>
                     </svg>
-                    <span>Katalog Kendaraan</span>
+                    <span>Upload Kendaraan</span>
                 </a>
 
-                {{-- CUSTOMERS --}}
-                <a href="{{ route('admin.customers.index') }}"
-                   class="flex items-center gap-3 px-3.5 py-2.5 text-xs tracking-wider transition border-l-2 {{ request()->routeIs('admin.customers*') ? 'bg-zinc-900 text-white border-[#881337] font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent font-medium' }}">
-                    <svg class="w-4 h-4 {{ request()->routeIs('admin.customers*') ? 'text-rose-500' : 'text-zinc-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                    </svg>
-                    <span>Data Pelanggan</span>
-                </a>
-
-                {{-- PENJUALAN / SALES --}}
+                {{-- PENJUALAN / SALES (IN OUT KENDARAAN) --}}
                 <a href="{{ route('admin.sales.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 text-xs tracking-wider transition border-l-2 {{ request()->routeIs('admin.sales*') ? 'bg-zinc-900 text-white border-[#881337] font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent font-medium' }}">
                     <svg class="w-4 h-4 {{ request()->routeIs('admin.sales*') ? 'text-rose-500' : 'text-zinc-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                     </svg>
-                    <span>Transaksi Penjualan</span>
-                </a>
-
-                {{-- LAPORAN --}}
-                <a href="{{ route('admin.reports.sales') }}"
-                   class="flex items-center gap-3 px-3.5 py-2.5 text-xs tracking-wider transition border-l-2 {{ request()->routeIs('admin.reports*') ? 'bg-zinc-900 text-white border-[#881337] font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent font-medium' }}">
-                    <svg class="w-4 h-4 {{ request()->routeIs('admin.reports*') ? 'text-rose-500' : 'text-zinc-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                    <span>Laporan Penjualan</span>
+                    <span>In Out Kendaraan</span>
                 </a>
 
                 <div class="pt-6">
@@ -135,38 +137,49 @@
         </aside>
 
         {{-- MAIN CONTENT AREA --}}
-        <main class="flex-1 flex flex-col min-w-0 bg-zinc-100">
+        <main class="flex-1 flex flex-col min-w-0 bg-zinc-100 min-h-screen">
 
             {{-- TOPBAR HEADER --}}
-            <header class="h-20 bg-white border-b border-zinc-200/90 flex items-center justify-between px-6 sm:px-8 sticky top-0 z-30 shadow-2xs">
+            <header class="h-20 bg-white border-b border-zinc-200/90 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 shadow-2xs">
 
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 bg-[#881337]"></span>
-                        <h2 class="font-bold text-base sm:text-lg text-zinc-900 tracking-[0.15em] uppercase">
-                            @yield('page-title', 'Dashboard Overview')
-                        </h2>
+                <div class="flex items-center gap-3">
+                    {{-- HAMBURGER TOGGLE BUTTON (MOBILE & TABLET) --}}
+                    <button @click="sidebarOpen = !sidebarOpen"
+                            class="lg:hidden text-zinc-700 hover:text-zinc-950 p-2 rounded-md border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 transition shrink-0"
+                            title="Buka Menu Admin">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-[#881337] shrink-0"></span>
+                            <h2 class="font-bold text-sm sm:text-base md:text-lg text-zinc-900 tracking-[0.15em] uppercase truncate">
+                                @yield('page-title', 'Dashboard Overview')
+                            </h2>
+                        </div>
+                        <p class="text-[10px] sm:text-[11px] font-mono-code text-zinc-400 mt-0.5 uppercase tracking-wider hidden sm:block">
+                            SUJA MOBILINDO &bull; MANAGEMENT SHOWROOM PLATFORM
+                        </p>
                     </div>
-                    <p class="text-[11px] font-mono-code text-zinc-400 mt-0.5 uppercase tracking-wider">
-                        SUJA MOBILINDO &bull; MANAGEMENT SHOWROOM PLATFORM
-                    </p>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3 sm:gap-4 shrink-0">
                     <a href="{{ route('home') }}" target="_blank"
-                       class="hidden md:inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-zinc-950 px-3.5 py-2 border border-zinc-200 hover:border-zinc-900 bg-zinc-50 hover:bg-white transition">
+                       class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-zinc-950 px-3 py-1.5 sm:px-3.5 sm:py-2 border border-zinc-200 hover:border-zinc-900 bg-zinc-50 hover:bg-white transition">
                         <span>Web Publik</span>
                         <span class="text-rose-600">↗</span>
                     </a>
 
-                    <div class="text-right pl-3 border-l border-zinc-200">
+                    <div class="text-right pl-2 sm:pl-3 border-l border-zinc-200">
                         <div class="flex items-center justify-end gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <p class="text-xs font-bold text-zinc-900 leading-none">
+                            <p class="text-xs font-bold text-zinc-900 leading-none truncate max-w-[120px] sm:max-w-none">
                                 {{ auth()->user()->name ?? 'Administrator' }}
                             </p>
                         </div>
-                        <p class="text-[10px] text-zinc-400 mt-1 uppercase tracking-wider font-mono-code">
+                        <p class="text-[10px] text-zinc-400 mt-1 uppercase tracking-wider font-mono-code hidden md:block">
                             {{ auth()->user()->email ?? 'admin@dealer.com' }}
                         </p>
                     </div>
@@ -175,7 +188,7 @@
             </header>
 
             {{-- PAGE CONTENT BODY --}}
-            <section class="flex-1 p-6 sm:p-8 max-w-7xl w-full">
+            <section class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0">
                 @yield('content')
             </section>
 
