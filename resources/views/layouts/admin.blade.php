@@ -20,95 +20,138 @@
             <div class="h-16 flex items-center px-6 border-b border-slate-700">
                 <div>
                     <h1 class="text-xl font-bold">🚗 Dealer App</h1>
-                    <p class="text-xs text-slate-400">Management System</p>
+                    <p class="text-xs text-slate-400">
+                        Management System
+                    </p>
                 </div>
             </div>
 
-            {{-- Navigation --}}
-            <nav class="flex-1 px-4 py-6 space-y-2">
 
+            {{-- Navigation --}}
+            <nav class="px-4 py-6 space-y-2">
+
+                {{-- Dashboard --}}
                 <a href="{{ route('admin.dashboard') }}"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl transition
                     {{ request()->routeIs('admin.dashboard')
                             ? 'bg-slate-800 text-white shadow-sm'
-                            : 'hover:bg-slate-50' }}">
+                            : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+
                     <span>📊</span>
                     <span>Dashboard</span>
+
                 </a>
 
+
+                {{-- Edit Kendaraan --}}
                 <a href="{{ route('admin.vehicles.index') }}"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl transition
                     {{ request()->routeIs('admin.vehicles.*')
                             ? 'bg-slate-800 text-white shadow-sm'
-                            : 'hover:bg-slate-50' }}">
-                    <span>🚗</span>
-                    <span>Inventory</span>
+                            : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+
+                    <span>✏️</span>
+                    <span>Edit Kendaraan</span>
+
                 </a>
 
-                <a href="{{ route('admin.customers.index') }}"
+
+                {{-- In / Out Kendaraan --}}
+                <a href="{{ route('admin.vehicle-movements.index') }}"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl transition
-                        {{ request()->routeIs('admin.customers.*')
-                                ? 'bg-slate-800 text-white shadow-sm'
-                                : 'hover:bg-slate-50' }}">
-                    <span>👥</span>
-                    <span>Customer</span>
+                    {{ request()->routeIs('admin.vehicle-movements.*')
+                            ? 'bg-slate-800 text-white shadow-sm'
+                            : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+
+                    <span>🔄</span>
+                    <span>In/Out Kendaraan</span>
+
                 </a>
-
-                <a href="{{ route('admin.sales.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl transition
-                    {{ request()->routeIs('admin.sales.*')
-                            ? 'bg-slate-800 text-white shadow-sm'  
-                            : 'hover:bg-slate-50' }}">
-                    <span>💰</span>
-                    <span>Keuangan</span>
-                </a>
-
-                <a href="{{ route('admin.reports.sales') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl transition
-                        {{ request()->routeIs('admin.reports.*')
-                                ? 'bg-slate-800 text-white shadow-sm'
-                                : 'hover:bg-slate-50' }}">
-                    <span>📈</span>
-                    <span>Laporan</span>
-                </a>
-
-                <div class="pt-6">
-                    <p class="px-4 mb-2 text-xs uppercase text-slate-500 font-semibold">
-                        System
-                    </p>
-
-                    <a href="#"
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition">
-                        <span>⚙️</span>
-                        <span>Pengaturan</span>
-                    </a>
-                </div>
 
             </nav>
 
-            {{-- User --}}
-            <div class="border-t border-slate-700 p-4">
-                <div class="flex items-center gap-3">
 
-                    <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center">
-                        👤
-                    </div>
+            {{-- WEBSITE PUBLIC --}}
+            <div class="px-4 pb-4">
+
+                <a href="{{ route('home') }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl
+                        text-slate-400 hover:bg-slate-800
+                        hover:text-white transition">
+
+                    <span>🌐</span>
 
                     <div>
-                        <p class="text-sm font-semibold">Administrator</p>
-                        <p class="text-xs text-slate-400">SUPER ADMIN</p>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
+                        <p class="text-sm font-semibold">
+                            Website Publik
+                        </p>
 
-                            <button type="submit"
-                                class="text-sm text-red-600 hover:text-red-800">
-                                Logout
-                            </button>
-                        </form>
+                        <p class="text-xs text-slate-500">
+                            Buka website
+                        </p>
+                    </div>
+
+                </a>
+
+            </div>
+
+
+                {{-- PROFILE ADMIN --}}
+                <div class="border-t border-slate-700 p-4">
+
+                    <div class="flex items-center gap-3">
+
+                        {{-- Avatar --}}
+                        <div class="w-10 h-10 rounded-full bg-slate-700
+                                    flex items-center justify-center shrink-0">
+                            👤
+                        </div>
+
+
+                        {{-- Admin Info --}}
+                        <div class="min-w-0">
+
+                            <p class="text-sm font-semibold truncate">
+                                Administrator
+                            </p>
+
+                            <p class="text-xs text-slate-400">
+                                SUPER ADMIN
+                            </p>
+
+
+                            {{-- Profile --}}
+                            <a href="#"
+                                class="text-xs text-slate-400
+                                    hover:text-white transition">
+                                Profile Admin
+                            </a>
+
+                            <span class="text-slate-600 mx-1">•</span>
+
+
+                            {{-- Logout --}}
+                            <form method="POST"
+                                action="{{ route('logout') }}"
+                                class="inline">
+
+                                @csrf
+
+                                <button type="submit"
+                                    class="text-xs text-red-400
+                                        hover:text-red-300 transition">
+                                    Logout
+                                </button>
+
+                            </form>
+
+                        </div>
+
                     </div>
 
                 </div>
-            </div>
 
         </aside>
 
@@ -116,10 +159,13 @@
         {{-- MAIN CONTENT --}}
         <main class="flex-1 flex flex-col">
 
+
             {{-- TOPBAR --}}
-            <header class="h-16 bg-white border-b flex items-center justify-between px-8">
+            <header class="h-16 bg-white border-b
+                           flex items-center justify-between px-8">
 
                 <div>
+
                     <h2 class="font-semibold text-lg">
                         @yield('page-title', 'Dashboard')
                     </h2>
@@ -127,23 +173,6 @@
                     <p class="text-xs text-slate-500">
                         Management System
                     </p>
-                </div>
-
-                <div class="flex items-center gap-4">
-
-                    <button class="text-xl">
-                        
-                    </button>
-
-                    <a
-                        href="{{ route('home') }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-slate-100 transition"
-                    >
-                        <div class="text-right">
-                            <div class="font-semibold text-slate-700">🌐 Website Public</div>
-                    </a>
 
                 </div>
 
@@ -163,6 +192,3 @@
 
 </body>
 </html>
-
-
-

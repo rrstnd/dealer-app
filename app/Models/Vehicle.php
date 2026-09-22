@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Observers\VehicleObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy([VehicleObserver::class])]
 class Vehicle extends Model
 {
     protected $fillable = [
@@ -58,5 +61,12 @@ class Vehicle extends Model
     {
         return $this->hasOne(VehicleImage::class)
             ->where('is_primary', true);
+    }
+
+    public function movements(): HasMany
+    {
+        return $this->hasMany(VehicleMovement::class)
+            ->latest('movement_date')
+            ->latest('id');
     }
 }

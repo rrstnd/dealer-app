@@ -6,13 +6,13 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\VehicleImageController;
-use App\Http\Controllers\Admin\SaleController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\VehicleController as WebsiteVehicleController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\VehicleTypeController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\VehicleModelController;
+use App\Http\Controllers\Admin\VehicleMovementController;
 
 
 /*
@@ -86,6 +86,9 @@ Route::prefix('admin')
     Route::post('/vehicle-models', [VehicleModelController::class, 'store'])
         ->name('vehicle-models.store');
 
+    Route::get('/vehicle-movements', [VehicleMovementController::class, 'index'])
+        ->name('vehicle-movements.index');
+
     // Vehicle Images
     Route::post('/vehicles/{vehicle}/images', [VehicleImageController::class, 'store'])
         ->name('vehicles.images.store');
@@ -119,33 +122,6 @@ Route::prefix('admin')
     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])
         ->name('customers.destroy');
 
-    // Sales
-    Route::get('/sales', [SaleController::class, 'index'])
-    ->name('sales.index');
-
-    Route::get('/sales/create', [SaleController::class, 'create'])
-        ->name('sales.create');
-
-    Route::post('/sales', [SaleController::class, 'store'])
-        ->name('sales.store');
-
-    Route::get('/sales/{sale}/edit', [SaleController::class, 'edit'])
-        ->name('sales.edit');
-
-    Route::get('/sales/{sale}', [SaleController::class, 'show'])
-        ->name('sales.show');
-
-    Route::put('/sales/{sale}', [SaleController::class, 'update'])
-        ->name('sales.update');
-
-    Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel'])
-        ->name('sales.cancel');
-    
-    Route::get('/reports', [ReportController::class, 'sales'])
-    ->name('reports.sales');
-
-    Route::get('/reports/sales/export', [ReportController::class, 'exportSales'])
-    ->name('reports.sales.export');
 });
 
 require __DIR__.'/auth.php';

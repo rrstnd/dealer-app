@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Sale;
 use App\Models\Vehicle;
+use App\Models\VehicleMovement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -117,6 +118,38 @@ class SaleController extends Controller
 
         DB::transaction(function () use ($validated, $sale) {
 
+            /*
+            |--------------------------------------------------------------------------
+            | Aturan transaksi COMPLETED
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $sale->status === 'COMPLETED'
+                && $validated['status'] !== 'COMPLETED'
+            ) {
+                abort(
+                    422,
+                    'Transaksi yang sudah COMPLETED tidak dapat diubah ke status lain.'
+                );
+            }
+
+            if (
+                $sale->status === 'COMPLETED'
+                && $validated['vehicle_id'] != $sale->vehicle_id
+            ) {
+                abort(
+                    422,
+                    'Kendaraan pada transaksi COMPLETED tidak dapat diganti.'
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock kendaraan
+            |--------------------------------------------------------------------------
+            */
+
             $oldVehicle = Vehicle::where('id', $sale->vehicle_id)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -125,7 +158,12 @@ class SaleController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Kalau kendaraan diganti
+            /*
+            |--------------------------------------------------------------------------
+            | Kalau kendaraan diganti
+            |--------------------------------------------------------------------------
+            */
+
             if ($oldVehicle->id !== $newVehicle->id) {
 
                 if ($newVehicle->status !== 'AVAILABLE') {
@@ -135,24 +173,40 @@ class SaleController extends Controller
                     );
                 }
 
-                // Kendaraan lama dikembalikan AVAILABLE
-                if (in_array($sale->status, ['BOOKED', 'DRAFT'])) {
+                /*
+                |--------------------------------------------------------------------------
+                | Kendaraan lama dikembalikan AVAILABLE
+                |--------------------------------------------------------------------------
+                */
+
+                if (in_array($sale->status, ['DRAFT', 'BOOKED'])) {
                     $oldVehicle->update([
                         'status' => 'AVAILABLE',
                     ]);
                 }
             }
 
-            // Pastikan kendaraan tujuan tersedia
+            /*
+            |--------------------------------------------------------------------------
+            | Pastikan kendaraan tujuan tersedia
+            |--------------------------------------------------------------------------
+            */
+
             if (
-                $newVehicle->id !== $sale->vehicle_id &&
-                $newVehicle->status !== 'AVAILABLE'
+                $newVehicle->id !== $sale->vehicle_id
+                && $newVehicle->status !== 'AVAILABLE'
             ) {
                 abort(
                     422,
                     'Kendaraan sudah tidak tersedia.'
                 );
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hitung harga
+            |--------------------------------------------------------------------------
+            */
 
             $vehiclePrice = $newVehicle->selling_price;
             $discount = $validated['discount'] ?? 0;
@@ -166,6 +220,12 @@ class SaleController extends Controller
 
             $finalPrice = $vehiclePrice - $discount;
 
+            /*
+            |--------------------------------------------------------------------------
+            | Update Sale
+            |--------------------------------------------------------------------------
+            */
+
             $sale->update([
                 'customer_id' => $validated['customer_id'],
                 'vehicle_id' => $newVehicle->id,
@@ -178,18 +238,46 @@ class SaleController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            // Atur status kendaraan berdasarkan status transaksi
+            /*
+            |--------------------------------------------------------------------------
+            | Atur status kendaraan
+            |--------------------------------------------------------------------------
+            */
+
             if ($validated['status'] === 'COMPLETED') {
+
                 $newVehicle->update([
                     'status' => 'SOLD',
                 ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Buat Vehicle Movement OUT hanya saat transaksi
+                | berubah menjadi COMPLETED
+                |--------------------------------------------------------------------------
+                */
+
+                if ($sale->wasChanged('status')) {
+
+                    VehicleMovement::create([
+                        'vehicle_id' => $newVehicle->id,
+                        'type' => 'OUT',
+                        'movement_date' => $validated['sale_date'],
+                        'reference' => $sale->invoice_number,
+                        'notes' => 'Kendaraan terjual',
+                    ]);
+                }
+
             } elseif ($validated['status'] === 'BOOKED') {
+
                 $newVehicle->update([
                     'status' => 'RESERVED',
                 ]);
+
             } elseif (
                 in_array($validated['status'], ['DRAFT', 'CANCELLED'])
             ) {
+
                 $newVehicle->update([
                     'status' => 'AVAILABLE',
                 ]);
@@ -215,7 +303,12 @@ class SaleController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Transaksi COMPLETED tidak boleh membatalkan stok kendaraan
+            /*
+            |--------------------------------------------------------------------------
+            | COMPLETED tidak boleh dibatalkan
+            |--------------------------------------------------------------------------
+            */
+
             if ($sale->status === 'COMPLETED') {
                 abort(
                     422,
@@ -281,17 +374,29 @@ class SaleController extends Controller
         ]);
 
         DB::transaction(function () use ($validated) {
+
             $vehicle = Vehicle::where('id', $validated['vehicle_id'])
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Kendaraan harus masih AVAILABLE
+            /*
+            |--------------------------------------------------------------------------
+            | Kendaraan harus AVAILABLE
+            |--------------------------------------------------------------------------
+            */
+
             if ($vehicle->status !== 'AVAILABLE') {
                 abort(
                     422,
                     'Kendaraan sudah tidak tersedia untuk dijual.'
                 );
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hitung harga
+            |--------------------------------------------------------------------------
+            */
 
             $vehiclePrice = $vehicle->selling_price;
             $discount = $validated['discount'] ?? 0;
@@ -305,7 +410,12 @@ class SaleController extends Controller
 
             $finalPrice = $vehiclePrice - $discount;
 
-            // Generate nomor invoice
+            /*
+            |--------------------------------------------------------------------------
+            | Generate nomor invoice
+            |--------------------------------------------------------------------------
+            */
+
             $invoiceNumber = 'INV-' . now()->format('Y') . '-' .
                 str_pad(
                     (Sale::max('id') ?? 0) + 1,
@@ -314,7 +424,13 @@ class SaleController extends Controller
                     STR_PAD_LEFT
                 );
 
-            Sale::create([
+            /*
+            |--------------------------------------------------------------------------
+            | Simpan Sale
+            |--------------------------------------------------------------------------
+            */
+
+            $sale = Sale::create([
                 'invoice_number' => $invoiceNumber,
                 'customer_id' => $validated['customer_id'],
                 'vehicle_id' => $vehicle->id,
@@ -327,17 +443,58 @@ class SaleController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            // Kalau transaksi selesai, kendaraan langsung SOLD
+            /*
+            |--------------------------------------------------------------------------
+            | COMPLETED
+            |--------------------------------------------------------------------------
+            */
+
             if ($validated['status'] === 'COMPLETED') {
+
                 $vehicle->update([
                     'status' => 'SOLD',
                 ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Catat kendaraan keluar
+                |--------------------------------------------------------------------------
+                */
+
+                VehicleMovement::create([
+                    'vehicle_id' => $vehicle->id,
+                    'type' => 'OUT',
+                    'movement_date' => $validated['sale_date'],
+                    'reference' => $sale->invoice_number,
+                    'notes' => 'Kendaraan terjual',
+                ]);
             }
 
-            // Kalau BOOKED, kendaraan ditahan
+            /*
+            |--------------------------------------------------------------------------
+            | BOOKED
+            |--------------------------------------------------------------------------
+            */
+
             if ($validated['status'] === 'BOOKED') {
+
                 $vehicle->update([
                     'status' => 'RESERVED',
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | DRAFT / CANCELLED
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                in_array($validated['status'], ['DRAFT', 'CANCELLED'])
+            ) {
+
+                $vehicle->update([
+                    'status' => 'AVAILABLE',
                 ]);
             }
         });

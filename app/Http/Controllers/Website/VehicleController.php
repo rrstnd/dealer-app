@@ -15,7 +15,7 @@ class VehicleController extends Controller
         $request->validate([
             'search' => 'nullable|string|max:100',
 
-            'brand_id' => 'nullable|integer|exists:vehicle_brands,id',
+            'brand_id' => 'nullable|integer|exists:brands,id',
 
             'year_min' => 'nullable|integer|min:1900|max:2100',
             'year_max' => 'nullable|integer|min:1900|max:2100',

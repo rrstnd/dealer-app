@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
+use App\Models\VehicleMovement;
 use App\Models\VehicleType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -139,7 +140,14 @@ class VehicleController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $vehicle = DB::transaction(function () use ($validated) {
+        /*
+        |--------------------------------------------------------------------------
+        | Generate Stock Code
+        |--------------------------------------------------------------------------
+        */
+        $nextStockCode = $this->generateNextStockCode();
+
+        $vehicle = DB::transaction(function () use ($validated, $nextStockCode) {
 
             /*
             |--------------------------------------------------------------------------
@@ -196,12 +204,11 @@ class VehicleController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Data kendaraan
+            | Data Kendaraan
             |--------------------------------------------------------------------------
             */
-            return Vehicle::create([
-                'stock_code' => $this->generateNextStockCode(),
-
+            $vehicle = Vehicle::create([
+                'stock_code' => $nextStockCode,
                 'vehicle_type_id' => $vehicleType->id,
                 'brand_id' => $brand->id,
                 'model_id' => $vehicleModel->id,
@@ -225,6 +232,21 @@ class VehicleController extends Controller
                 'status' => $validated['status'],
                 'description' => $validated['description'] ?? null,
             ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Catat Vehicle Movement
+            |--------------------------------------------------------------------------
+            */
+            VehicleMovement::create([
+                'vehicle_id' => $vehicle->id,
+                'type' => 'IN',
+                'movement_date' => now()->toDateString(),
+                'reference' => null,
+                'notes' => 'Kendaraan masuk',
+            ]);
+
+            return $vehicle;
         });
 
         return redirect()
@@ -292,7 +314,6 @@ class VehicleController extends Controller
             | Cari / buat Vehicle Type
             |--------------------------------------------------------------------------
             */
-
             $vehicleType = VehicleType::query()
                 ->whereRaw('LOWER(name) = ?', [
                     strtolower(trim($validated['type']))
@@ -310,7 +331,6 @@ class VehicleController extends Controller
             | Cari / buat Brand
             |--------------------------------------------------------------------------
             */
-
             $brand = Brand::query()
                 ->whereRaw('LOWER(name) = ?', [
                     strtolower(trim($validated['brand']))
@@ -328,7 +348,6 @@ class VehicleController extends Controller
             | Cari / buat Model berdasarkan Brand
             |--------------------------------------------------------------------------
             */
-
             $vehicleModel = VehicleModel::query()
                 ->where('brand_id', $brand->id)
                 ->whereRaw('LOWER(name) = ?', [
@@ -345,10 +364,9 @@ class VehicleController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Update kendaraan
+            | Update Kendaraan
             |--------------------------------------------------------------------------
             */
-
             $vehicle->update([
                 // Stock Code sengaja TIDAK diubah.
                 // Nilai lama tetap dipertahankan.

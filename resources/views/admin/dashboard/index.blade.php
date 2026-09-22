@@ -155,7 +155,7 @@
         </div>
 
         <a
-            href="{{ route('admin.sales.index') }}"
+            href="{{ route('admin.vehicle-movements.index') }}"
             class="text-sm font-medium text-blue-600 hover:text-blue-700"
         >
             Lihat Semua →
