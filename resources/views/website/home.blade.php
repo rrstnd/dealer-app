@@ -272,6 +272,16 @@
                                     <span class="text-xs mt-1 font-mono-code">Foto Dalam Proses</span>
                                 </div>
                             @endif
+
+                            {{-- BADGE UNIT UNGGULAN (DI-PIN ADMIN) --}}
+                            @if ($vehicle->is_pinned)
+                                <div class="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-[#881337] text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 shadow-md">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                    </svg>
+                                    <span>Unggulan</span>
+                                </div>
+                            @endif
                         </div>
 
                         {{-- BODY INFO --}}
@@ -478,12 +488,12 @@
                 </h2>
                 <div class="w-12 h-0.5 bg-[#881337] mx-auto"></div>
                 <p class="text-xs sm:text-sm text-zinc-500 leading-relaxed font-normal pt-1">
-                    Ikuti dokumentasi aktivitas serah terima kendaraan, review unit masuk, dan informasi stok terbaru langsung dari kanal TikTok, Instagram, & YouTube Suja MobilIndo.
+                    Ikuti dokumentasi aktivitas serah terima kendaraan, review unit masuk, dan informasi stok terbaru langsung dari kanal TikTok dan Instagram Suja MobilIndo.
                 </p>
             </div>
 
-            {{-- 3-COLUMN SOCIAL MEDIA SHOWCASE (ICON ONLY, NO PREVIEW PHOTOS) --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            {{-- 2-COLUMN SOCIAL MEDIA SHOWCASE (ICON ONLY, NO PREVIEW PHOTOS) --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
                 
                 {{-- 1. TIKTOK CARD --}}
                 <div class="bg-white border border-zinc-200 shadow-xs hover:shadow-xl hover:border-zinc-300 transition-all duration-300 flex flex-col justify-between group p-8 relative overflow-hidden">
@@ -555,40 +565,7 @@
                     </div>
                 </div>
 
-                {{-- 3. YOUTUBE CARD --}}
-                <div class="bg-white border border-zinc-200 shadow-xs hover:shadow-xl hover:border-zinc-300 transition-all duration-300 flex flex-col justify-between group p-8 relative overflow-hidden">
-                    <div class="absolute -right-8 -top-8 w-32 h-32 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/10 transition"></div>
-                    
-                    <div>
-                        {{-- PLATFORM ICON --}}
-                        <div class="w-16 h-16 rounded-2xl bg-[#FF0000] text-white flex items-center justify-center shadow-md group-hover:scale-110 transition duration-300 mb-6">
-                            <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
-                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                            </svg>
-                        </div>
 
-                        {{-- BADGE & HANDLE --}}
-                        <div class="flex items-center justify-between text-[11px] font-mono-code text-zinc-500 mb-4 border-b border-zinc-100 pb-3">
-                            <span class="font-bold text-zinc-900">Suja Mobilindo Channel</span>
-                            <span class="bg-red-50 text-red-700 px-2.5 py-0.5 rounded text-[10px] font-sans font-bold tracking-wider">YOUTUBE</span>
-                        </div>
-
-                        <h3 class="text-base font-bold uppercase tracking-wider text-zinc-950 mb-2 group-hover:text-[#881337] transition">
-                            Uji Jalan & Ulasan Lengkap
-                        </h3>
-                        <p class="text-xs text-zinc-600 leading-relaxed mb-6">
-                            Panduan lengkap uji jalan kendaraan, tes suspensi, akselerasi mesin, serta edukasi tips merawat mobil dan motor.
-                        </p>
-                    </div>
-
-                    <div class="pt-4 border-t border-zinc-100">
-                        <a href="https://www.youtube.com" target="_blank"
-                           class="w-full inline-flex items-center justify-center gap-2 border border-zinc-900 text-zinc-950 hover:bg-zinc-950 hover:text-white text-xs font-bold uppercase tracking-wider py-3 transition shadow-xs">
-                            <span>Tonton di YouTube</span>
-                            <span>↗</span>
-                        </a>
-                    </div>
-                </div>
 
             </div>
 
@@ -759,15 +736,7 @@
                             <span class="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition">↗</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="https://www.youtube.com" target="_blank" class="hover:text-white transition flex items-center gap-2 text-zinc-400 group">
-                            <svg class="w-3.5 h-3.5 fill-current text-zinc-400 group-hover:text-white transition shrink-0" viewBox="0 0 24 24">
-                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                            </svg>
-                            <span>YouTube</span>
-                            <span class="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition">↗</span>
-                        </a>
-                    </li>
+
                 </ul>
             </div>
 
@@ -783,7 +752,7 @@
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 mt-10 border-t border-zinc-800 text-center text-zinc-600 font-mono-code text-[11px]">
-            &copy; {{ date('Y') }} Suja MobilIndo. Seluruh hak cipta dilindungi. Showroom Otomotif Terpercaya.
+            &copy; {{ date('Y') }} Suja MobilIndo. Seluruh hak cipta dilindungi.
         </div>
     </footer>
 

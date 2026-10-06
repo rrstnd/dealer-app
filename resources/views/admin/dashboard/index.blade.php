@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Dashboard')
-@section('page-title', 'Dashboard Overview')
+@section('page-title', 'Dashboard')
 
 @section('content')
 
@@ -18,18 +18,48 @@
     </p>
 </div>
 
+{{-- FILTER BULAN & TAHUN --}}
+<div class="bg-white border border-zinc-200 p-4 shadow-xs mb-6">
+    <form method="GET" action="{{ route('admin.dashboard') }}" class="flex flex-col sm:flex-row items-end gap-4">
+        <div class="w-full sm:w-48">
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Pilih Bulan</label>
+            <select name="month" class="w-full px-3 py-2.5 text-xs border border-zinc-300 focus:outline-none focus:border-zinc-900 bg-zinc-50 transition">
+                @foreach(range(1, 12) as $m)
+                    <option value="{{ sprintf('%02d', $m) }}" {{ $month == sprintf('%02d', $m) ? 'selected' : '' }}>
+                        {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="w-full sm:w-48">
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Pilih Tahun</label>
+            <select name="year" class="w-full px-3 py-2.5 text-xs border border-zinc-300 focus:outline-none focus:border-zinc-900 bg-zinc-50 transition">
+                @foreach(range(date('Y') - 5, date('Y')) as $y)
+                    <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="w-full sm:w-auto mt-2 sm:mt-0">
+            <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition flex items-center justify-center gap-2">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                Terapkan Filter
+            </button>
+        </div>
+    </form>
+</div>
+
 {{-- 4 STATISTIC CARDS (CARITA LUXURY STYLE) --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
 
-    {{-- 1. TOTAL KENDARAAN --}}
+    {{-- 1. MOTOR MASUK --}}
     <div class="bg-white border border-zinc-200 p-5 shadow-xs hover:border-zinc-900 transition duration-200">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
-                    Total Unit
+                    Motor Masuk
                 </p>
                 <p class="text-2xl sm:text-3xl font-light text-zinc-900 mt-2 tracking-tight">
-                    {{ number_format($totalVehicles) }}
+                    {{ number_format($motorMasuk) }}
                 </p>
             </div>
             <div class="w-10 h-10 bg-zinc-100 text-zinc-800 flex items-center justify-center">
@@ -39,19 +69,41 @@
             </div>
         </div>
         <div class="mt-3 pt-3 border-t border-zinc-100 text-[10px] text-zinc-400 font-mono-code uppercase">
-            Semua kategori unit
+            Bulan {{ date('F', mktime(0, 0, 0, $month, 1)) }} {{ $year }}
         </div>
     </div>
 
-    {{-- 2. TERSEDIA --}}
+    {{-- 2. MOBIL MASUK --}}
+    <div class="bg-white border border-zinc-200 p-5 shadow-xs hover:border-zinc-900 transition duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
+                    Mobil Masuk
+                </p>
+                <p class="text-2xl sm:text-3xl font-light text-zinc-900 mt-2 tracking-tight">
+                    {{ number_format($mobilMasuk) }}
+                </p>
+            </div>
+            <div class="w-10 h-10 bg-zinc-100 text-zinc-800 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.4-1.7-1.1-2.2l-3.4-2.3c-.5-.4-1.2-.6-1.9-.6H7.4c-.7 0-1.4.2-1.9.6L2.1 10.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2m15 0a3 3 0 11-6 0m6 0a3 3 0 10-6 0M4 17a3 3 0 11-6 0m6 0a3 3 0 10-6 0M5 9l2-4h10l2 4"/>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-zinc-100 text-[10px] text-zinc-400 font-mono-code uppercase">
+            Bulan {{ date('F', mktime(0, 0, 0, $month, 1)) }} {{ $year }}
+        </div>
+    </div>
+
+    {{-- 3. MOTOR TERJUAL --}}
     <div class="bg-white border border-zinc-200 p-5 shadow-xs hover:border-emerald-500 transition duration-200">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-700">
-                    Siap Jual
+                    Motor Terjual
                 </p>
                 <p class="text-2xl sm:text-3xl font-light text-emerald-700 mt-2 tracking-tight">
-                    {{ number_format($availableVehicles) }}
+                    {{ number_format($motorTerjual) }}
                 </p>
             </div>
             <div class="w-10 h-10 bg-emerald-50 text-emerald-700 flex items-center justify-center">
@@ -61,138 +113,35 @@
             </div>
         </div>
         <div class="mt-3 pt-3 border-t border-zinc-100 text-[10px] text-emerald-600 font-mono-code uppercase">
-            Ready di showroom
+            Bulan {{ date('F', mktime(0, 0, 0, $month, 1)) }} {{ $year }}
         </div>
     </div>
 
-    {{-- 3. TERJUAL --}}
-    <div class="bg-white border border-zinc-200 p-5 shadow-xs hover:border-rose-600 transition duration-200">
+    {{-- 4. MOBIL TERJUAL --}}
+    <div class="bg-white border border-zinc-200 p-5 shadow-xs hover:border-emerald-500 transition duration-200">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-rose-700">
-                    Unit Terjual
+                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-700">
+                    Mobil Terjual
                 </p>
-                <p class="text-2xl sm:text-3xl font-light text-rose-700 mt-2 tracking-tight">
-                    {{ number_format($soldVehicles) }}
+                <p class="text-2xl sm:text-3xl font-light text-emerald-700 mt-2 tracking-tight">
+                    {{ number_format($mobilTerjual) }}
                 </p>
             </div>
-            <div class="w-10 h-10 bg-rose-50 text-rose-700 flex items-center justify-center">
+            <div class="w-10 h-10 bg-emerald-50 text-emerald-700 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
         </div>
-        <div class="mt-3 pt-3 border-t border-zinc-100 text-[10px] text-rose-600 font-mono-code uppercase">
-            Transaksi selesai
-        </div>
-    </div>
-
-    {{-- 4. RESERVED --}}
-    <div class="bg-white border border-zinc-200 p-5 shadow-xs hover:border-amber-500 transition duration-200">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-700">
-                    Tanda Jadi
-                </p>
-                <p class="text-2xl sm:text-3xl font-light text-amber-700 mt-2 tracking-tight">
-                    {{ number_format($reservedVehicles) }}
-                </p>
-            </div>
-            <div class="w-10 h-10 bg-amber-50 text-amber-700 flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-        </div>
-        <div class="mt-3 pt-3 border-t border-zinc-100 text-[10px] text-amber-600 font-mono-code uppercase">
-            Unit di-booking
+        <div class="mt-3 pt-3 border-t border-zinc-100 text-[10px] text-emerald-600 font-mono-code uppercase">
+            Bulan {{ date('F', mktime(0, 0, 0, $month, 1)) }} {{ $year }}
         </div>
     </div>
 
 </div>
 
-{{-- PENJUALAN TERBARU (TRANSAKSI) --}}
-<div class="bg-white border border-zinc-200 mb-8 shadow-xs">
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4 border-b border-zinc-100 gap-2">
-        <div>
-            <div class="flex items-center gap-2">
-                <span class="w-1.5 h-1.5 bg-[#881337]"></span>
-                <h2 class="text-sm font-bold tracking-[0.15em] text-zinc-900 uppercase">
-                    In Out Kendaraan Terbaru
-                </h2>
-            </div>
-            <p class="text-xs text-zinc-400 mt-0.5">
-                Daftar transaksi penjualan unit showroom yang baru tercatat
-            </p>
-        </div>
-
-        <a href="{{ route('admin.sales.index') }}"
-           class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-rose-600 transition">
-            <span>Lihat Semua Transaksi</span>
-            <span>→</span>
-        </a>
-    </div>
-
-    @if($recentLogs->count())
-        <div class="overflow-x-auto">
-            <table class="w-full text-xs">
-                <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-500 uppercase tracking-wider text-[10px] font-bold">
-                    <tr>
-                        <th class="text-left px-6 py-3.5">Status Mutasi</th>
-                        <th class="text-left px-6 py-3.5">Tanggal & Waktu</th>
-                        <th class="text-left px-6 py-3.5">Kode Stok</th>
-                        <th class="text-left px-6 py-3.5">Nama Kendaraan</th>
-                        <th class="text-left px-6 py-3.5">Harga Jual</th>
-                        <th class="text-left px-6 py-3.5">Keterangan</th>
-                    </tr>
-                </thead>
-
-                <tbody class="divide-y divide-zinc-100">
-                    @foreach($recentLogs as $log)
-                        <tr class="hover:bg-zinc-50/80 transition">
-                            <td class="px-6 py-4">
-                                @if($log->type === 'IN')
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase border border-emerald-200 bg-emerald-50 text-emerald-800">
-                                        🟢 IN (DITAMBAH)
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase border border-rose-200 bg-rose-50 text-rose-800">
-                                        🔴 OUT (DIHAPUS)
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 font-mono-code text-zinc-700">
-                                {{ $log->action_at?->format('d/m/Y H:i') }}
-                            </td>
-                            <td class="px-6 py-4 font-mono-code font-bold text-zinc-900">
-                                {{ $log->stock_code }}
-                            </td>
-                            <td class="px-6 py-4 font-bold text-zinc-800 uppercase">
-                                {{ $log->vehicle_name }}
-                            </td>
-                            <td class="px-6 py-4 font-bold text-zinc-950">
-                                Rp {{ number_format($log->price, 0, ',', '.') }}
-                            </td>
-                            <td class="px-6 py-4 text-zinc-500 italic">
-                                {{ $log->notes ?? '-' }}
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    @else
-        <div class="px-6 py-12 text-center text-zinc-400">
-            <svg class="w-8 h-8 mx-auto text-zinc-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-            </svg>
-            <p class="text-xs font-bold uppercase tracking-wider text-zinc-700">Belum Ada Mutasi In Out Kendaraan</p>
-            <p class="text-[11px] text-zinc-400 mt-1">Riwayat kendaraan yang ditambah/dihapus akan otomatis tercatat di sini.</p>
-        </div>
-    @endif
-
-</div>
 
 {{-- INVENTORY KENDARAAN TERBARU --}}
 <div>

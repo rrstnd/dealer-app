@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Detail Kendaraan: ' . ($vehicle->brand->name ?? '') . ' ' . ($vehicle->model->name ?? ''))
-@section('page-title', 'Detail Kendaraan')
+@section('page-title', '')
 
 @section('content')
 
@@ -42,15 +42,15 @@
             </p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <a href="{{ route('vehicles.show', $vehicle) }}" target="_blank"
-               class="inline-flex items-center gap-1.5 px-4 py-2.5 border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-bold uppercase tracking-wider transition">
+               class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-bold uppercase tracking-wider transition w-full sm:w-auto">
                 <span>Pratinjau Web</span>
                 <span class="text-rose-600">↗</span>
             </a>
 
             <a href="{{ route('admin.vehicles.edit', $vehicle) }}"
-               class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition shadow-xs">
+               class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition shadow-xs w-full sm:w-auto">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                 </svg>
@@ -134,22 +134,13 @@
                 <span class="font-mono-code text-zinc-800 font-medium">{{ number_format($vehicle->mileage ?? 0, 0, ',', '.') }} KM</span>
             </div>
 
-            <div class="p-4 space-y-1">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">Nomor Polisi (Plat)</span>
-                <span class="font-mono-code font-bold text-zinc-900 uppercase">{{ $vehicle->license_plate ?? '-' }}</span>
-            </div>
 
             <div class="p-4 space-y-1">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">Bahan Bakar</span>
                 <span class="font-semibold text-zinc-800">{{ $vehicle->fuel_type ?? '-' }}</span>
             </div>
 
-            <div class="p-4 space-y-1">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">Harga Modal / Beli</span>
-                <span class="font-mono-code font-bold text-zinc-600">
-                    Rp {{ number_format($vehicle->purchase_price ?? 0, 0, ',', '.') }}
-                </span>
-            </div>
+
 
             <div class="p-4 space-y-1">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">Harga Jual Showroom</span>
@@ -189,8 +180,9 @@
                   class="flex items-center gap-2">
                 @csrf
                 <input type="file"
-                       name="image"
+                       name="images[]"
                        accept=".jpg,.jpeg,.png,.webp"
+                       multiple
                        required
                        class="text-xs text-zinc-500 file:mr-3 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-zinc-100 file:text-zinc-800 hover:file:bg-zinc-200 cursor-pointer">
 

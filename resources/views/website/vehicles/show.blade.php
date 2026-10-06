@@ -43,9 +43,9 @@
                 {{-- BACK TO CATALOG BUTTON --}}
                 <div class="flex items-center gap-4">
                     <a href="{{ route('vehicles.index') }}"
-                       class="text-xs font-bold uppercase tracking-wider text-zinc-900 hover:text-black transition flex items-center gap-2 border border-zinc-900 px-4 py-2 hover:bg-zinc-900 hover:text-white">
+                       class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-zinc-900 hover:text-black transition flex items-center gap-1.5 border border-zinc-900 px-3 py-1.5 sm:px-4 sm:py-2 hover:bg-zinc-900 hover:text-white shrink-0">
                         <span>←</span>
-                        <span>Kembali ke Katalog</span>
+                        <span><span class="hidden sm:inline">Kembali ke </span>Katalog</span>
                     </a>
                 </div>
             </div>
@@ -106,7 +106,19 @@
                 <div class="space-y-4"
                      x-data="{
                         activeIndex: {{ $primaryIdx }},
+                        lightboxOpen: false,
                         images: {{ json_encode($imageList) }},
+                        touchStartX: 0,
+                        touchEndX: 0,
+                        openLightbox(index) {
+                            this.activeIndex = index;
+                            this.lightboxOpen = true;
+                            document.body.style.overflow = 'hidden';
+                        },
+                        closeLightbox() {
+                            this.lightboxOpen = false;
+                            document.body.style.overflow = '';
+                        },
                         next() {
                             if (this.images.length > 0) {
                                 this.activeIndex = (this.activeIndex + 1) % this.images.length;
@@ -116,65 +128,103 @@
                             if (this.images.length > 0) {
                                 this.activeIndex = (this.activeIndex - 1 + this.images.length) % this.images.length;
                             }
+                        },
+                        handleSwipe() {
+                            const swipeThreshold = 50; // minimum swipe distance in pixels
+                            if (this.touchEndX < this.touchStartX - swipeThreshold) {
+                                this.next(); // Swipe left to go next
+                            }
+                            if (this.touchEndX > this.touchStartX + swipeThreshold) {
+                                this.prev(); // Swipe right to go prev
+                            }
                         }
                      }"
-                     @keydown.window.left="prev()"
-                     @keydown.window.right="next()">
+                     @keydown.window.left="if(lightboxOpen) prev()"
+                     @keydown.window.right="if(lightboxOpen) next()"
+                     @keydown.window.escape="if(lightboxOpen) closeLightbox()">
                     
-                    @if (count($imageList) > 0)
-                        {{-- HERO SLIDER PREVIEW --}}
-                        <div class="relative aspect-[16/10] bg-zinc-950 overflow-hidden border border-zinc-200 shadow-md group">
+                    @php $imgCount = count($imageList); @endphp
+                    @if ($imgCount > 0)
+                        {{-- BIG HERO IMAGE --}}
+                        <div class="relative w-full aspect-[4/5] md:aspect-[3/4] bg-zinc-100 cursor-pointer overflow-hidden group"
+                             @click="openLightbox(0)">
+                            <img src="{{ $imageList[$primaryIdx] ?? $imageList[0] }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
                             
-                            {{-- MAIN DISPLAY IMAGE --}}
-                            <template x-for="(img, idx) in images" :key="idx">
-                                <img :src="img" 
-                                     alt="{{ $vehicle->brand->name }} {{ $vehicle->model->name }}" 
-                                     x-show="activeIndex === idx"
-                                     x-transition:enter="transition ease-out duration-300"
-                                     x-transition:enter-start="opacity-0 scale-98"
-                                     x-transition:enter-end="opacity-100 scale-100"
-                                     class="w-full h-full object-cover select-none">
-                            </template>
+                            {{-- OVERLAY GRADIENT FOR TEXT --}}
+                            <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/40 pointer-events-none transition duration-500 group-hover:bg-black/10"></div>
 
-                            {{-- PREVIOUS BUTTON (<) --}}
-                            <button @click="prev()" 
-                                    x-show="images.length > 1" 
-                                    type="button"
-                                    class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black text-white flex items-center justify-center transition opacity-80 group-hover:opacity-100 cursor-pointer z-10"
-                                    title="Foto Sebelumnya">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-
-                            {{-- NEXT BUTTON (>) --}}
-                            <button @click="next()" 
-                                    x-show="images.length > 1" 
-                                    type="button"
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black text-white flex items-center justify-center transition opacity-80 group-hover:opacity-100 cursor-pointer z-10"
-                                    title="Foto Berikutnya">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
-
-                            {{-- COUNTER OVERLAY BADGE --}}
-                            <div x-show="images.length > 1" 
-                                 class="absolute bottom-4 right-4 bg-black/80 text-white text-xs font-mono-code px-3 py-1 tracking-wider z-10">
-                                <span x-text="activeIndex + 1"></span> / <span x-text="images.length"></span>
+                            {{-- TOP LEFT TEXT OVERLAY --}}
+                            <div class="absolute top-6 left-6 text-white pointer-events-none drop-shadow-lg pr-24">
+                                <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter">{{ $vehicle->brand->name ?? '' }}</h2>
+                                <p class="text-xl md:text-3xl font-bold uppercase tracking-tight mt-1 leading-none">{{ $vehicle->model->name ?? '' }}</p>
+                                @if($vehicle->variant)
+                                    <p class="text-sm md:text-lg font-medium text-zinc-200 mt-2 uppercase tracking-widest">{{ $vehicle->variant }}</p>
+                                @endif
                             </div>
+
+                            {{-- TOP RIGHT TEXT OVERLAY --}}
+                            <div class="absolute top-6 right-6 flex flex-col items-end gap-1 pointer-events-none drop-shadow-lg">
+                                <span class="bg-[#2563eb] text-white px-3 py-1 text-2xl md:text-3xl font-black">{{ $vehicle->year }}</span>
+                                <span class="text-white text-xl md:text-2xl font-bold tracking-widest drop-shadow-md mt-1">
+                                    {{ $vehicle->transmission === 'Automatic' ? 'A/T' : ($vehicle->transmission === 'Manual' ? 'M/T' : strtoupper($vehicle->transmission ?? '')) }}
+                                </span>
+                            </div>
+
+                            {{-- BOTTOM RIGHT (+X FOTO) --}}
+                            @if($imgCount > 1)
+                                <div class="absolute bottom-6 right-6 bg-black/70 backdrop-blur-md px-5 py-3 border border-white/20 text-white font-bold tracking-widest text-sm md:text-base flex items-center gap-2 transition group-hover:bg-white group-hover:text-black cursor-pointer">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    LIHAT {{ $imgCount }} FOTO
+                                </div>
+                            @endif
                         </div>
 
-                        {{-- THUMBNAILS ROW --}}
-                        <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                            <template x-for="(img, idx) in images" :key="idx">
-                                <button type="button" 
-                                        @click="activeIndex = idx"
-                                        :class="activeIndex === idx ? 'border-zinc-950 ring-1 ring-zinc-950 opacity-100' : 'border-zinc-200 opacity-60 hover:opacity-100'"
-                                        class="aspect-[16/10] bg-zinc-100 overflow-hidden border transition cursor-pointer">
-                                    <img :src="img" alt="Thumbnail" class="w-full h-full object-cover">
-                                </button>
-                            </template>
+                        {{-- FULLSCREEN LIGHTBOX MODAL --}}
+                        <div x-show="lightboxOpen" 
+                             style="display: none;"
+                             class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+                             @click.self="closeLightbox()"
+                             @touchstart="touchStartX = $event.changedTouches[0].screenX"
+                             @touchend="touchEndX = $event.changedTouches[0].screenX; handleSwipe()"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0">
+                             
+
+
+                             {{-- PREV BUTTON --}}
+                             <button @click="prev()" type="button" x-show="images.length > 1" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 bg-black/60 hover:bg-black/90 text-white border border-white/20 flex items-center justify-center rounded-full transition z-[60] cursor-pointer backdrop-blur-sm shadow-xl">
+                                 <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                 </svg>
+                             </button>
+
+                             {{-- IMAGE DISPLAY --}}
+                             <template x-for="(img, idx) in images" :key="idx">
+                                 <img :src="img" 
+                                      x-show="activeIndex === idx"
+                                      x-transition:enter="transition ease-out duration-300"
+                                      x-transition:enter-start="opacity-0 scale-95"
+                                      x-transition:enter-end="opacity-100 scale-100"
+                                      class="max-w-[90vw] max-h-[90vh] object-contain select-none shadow-2xl">
+                             </template>
+
+                             {{-- NEXT BUTTON --}}
+                             <button @click="next()" type="button" x-show="images.length > 1" class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 bg-black/60 hover:bg-black/90 text-white border border-white/20 flex items-center justify-center rounded-full transition z-[60] cursor-pointer backdrop-blur-sm shadow-xl">
+                                 <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                 </svg>
+                             </button>
+
+                             {{-- COUNTER --}}
+                             <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/70 font-mono-code text-sm tracking-widest bg-black/50 px-4 py-2 rounded-full">
+                                 <span x-text="activeIndex + 1"></span> / <span x-text="images.length"></span>
+                             </div>
                         </div>
                     @else
                         <div class="aspect-[16/10] bg-white border border-zinc-200 flex flex-col items-center justify-center text-zinc-400">
@@ -311,15 +361,7 @@
                             <span class="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition">↗</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="https://www.youtube.com" target="_blank" class="hover:text-white transition flex items-center gap-2 text-zinc-400 group">
-                            <svg class="w-3.5 h-3.5 fill-current text-zinc-400 group-hover:text-white transition shrink-0" viewBox="0 0 24 24">
-                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                            </svg>
-                            <span>YouTube</span>
-                            <span class="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition">↗</span>
-                        </a>
-                    </li>
+
                 </ul>
             </div>
 
@@ -335,7 +377,7 @@
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 mt-10 border-t border-zinc-800 text-center text-zinc-600 font-mono-code text-[11px]">
-            &copy; {{ date('Y') }} Suja MobilIndo. Seluruh hak cipta dilindungi. Showroom Otomotif Terpercaya.
+            &copy; {{ date('Y') }} Suja MobilIndo. Seluruh hak cipta dilindungi.
         </div>
     </footer>
 

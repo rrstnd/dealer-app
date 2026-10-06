@@ -76,21 +76,23 @@
 
                 {{-- INVENTORY / VEHICLES --}}
                 <a href="{{ route('admin.vehicles.index') }}"
-                   class="flex items-center gap-3 px-3.5 py-2.5 text-xs tracking-wider transition border-l-2 {{ request()->routeIs('admin.vehicles*') ? 'bg-zinc-900 text-white border-[#881337] font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent font-medium' }}">
-                    <svg class="w-4 h-4 {{ request()->routeIs('admin.vehicles*') ? 'text-rose-500' : 'text-zinc-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="flex items-center gap-3 px-3.5 py-2.5 text-xs tracking-wider transition border-l-2 {{ request()->routeIs('admin.vehicles.*') && !request()->routeIs('admin.vehicles.trash*') ? 'bg-zinc-900 text-white border-[#881337] font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent font-medium' }}">
+                    <svg class="w-4 h-4 {{ request()->routeIs('admin.vehicles.*') && !request()->routeIs('admin.vehicles.trash*') ? 'text-rose-500' : 'text-zinc-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.4-1.7-1.1-2.2l-3.4-2.3c-.5-.4-1.2-.6-1.9-.6H7.4c-.7 0-1.4.2-1.9.6L2.1 10.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2m15 0a3 3 0 11-6 0m6 0a3 3 0 10-6 0M4 17a3 3 0 11-6 0m6 0a3 3 0 10-6 0M5 9l2-4h10l2 4"/>
                     </svg>
                     <span>Upload Kendaraan</span>
                 </a>
 
-                {{-- PENJUALAN / SALES (IN OUT KENDARAAN) --}}
-                <a href="{{ route('admin.sales.index') }}"
-                   class="flex items-center gap-3 px-3.5 py-2.5 text-xs tracking-wider transition border-l-2 {{ request()->routeIs('admin.sales*') ? 'bg-zinc-900 text-white border-[#881337] font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent font-medium' }}">
-                    <svg class="w-4 h-4 {{ request()->routeIs('admin.sales*') ? 'text-rose-500' : 'text-zinc-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                {{-- TRASHED VEHICLES HISTORY --}}
+                <a href="{{ route('admin.vehicles.trash') }}"
+                   class="flex items-center gap-3 px-3.5 py-2.5 text-xs tracking-wider transition border-l-2 {{ request()->routeIs('admin.vehicles.trash*') ? 'bg-zinc-900 text-white border-[#881337] font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60 border-transparent font-medium' }}">
+                    <svg class="w-4 h-4 {{ request()->routeIs('admin.vehicles.trash*') ? 'text-rose-500' : 'text-zinc-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
-                    <span>In Out Kendaraan</span>
+                    <span>Riwayat Terhapus</span>
                 </a>
+
+
 
                 <div class="pt-6">
                     <div class="px-3 pb-2 text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-500">
@@ -111,28 +113,7 @@
 
             </nav>
 
-            {{-- USER PROFILE AT BOTTOM --}}
-            <div class="border-t border-zinc-800/80 p-3.5 bg-black/30">
-                <div class="flex items-center justify-between gap-3 bg-zinc-900/80 border border-zinc-800/80 p-2.5">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-8 h-8 bg-[#881337] text-white font-black text-[11px] flex items-center justify-center shrink-0">
-                            AD
-                        </div>
-                        <div class="truncate">
-                            <p class="text-xs font-bold text-white leading-none truncate">{{ auth()->user()->name ?? 'Admin Showroom' }}</p>
-                            <p class="text-[10px] text-zinc-400 mt-1 uppercase tracking-wider">Super Admin</p>
-                        </div>
-                    </div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" title="Keluar / Logout" class="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-zinc-800 transition cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-                            </svg>
-                        </button>
-                    </form>
-                </div>
-            </div>
+
 
         </aside>
 
@@ -140,9 +121,9 @@
         <main class="flex-1 flex flex-col min-w-0 bg-zinc-100 min-h-screen">
 
             {{-- TOPBAR HEADER --}}
-            <header class="h-20 bg-white border-b border-zinc-200/90 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 shadow-2xs">
+            <header class="h-20 bg-white border-b border-zinc-200/90 flex items-center justify-between px-3 sm:px-8 sticky top-0 z-30 shadow-2xs">
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                     {{-- HAMBURGER TOGGLE BUTTON (MOBILE & TABLET) --}}
                     <button @click="sidebarOpen = !sidebarOpen"
                             class="lg:hidden text-zinc-700 hover:text-zinc-950 p-2 rounded-md border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 transition shrink-0"
@@ -152,11 +133,11 @@
                         </svg>
                     </button>
 
-                    <div>
+                    <div class="min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 bg-[#881337] shrink-0"></span>
-                            <h2 class="font-bold text-sm sm:text-base md:text-lg text-zinc-900 tracking-[0.15em] uppercase truncate">
-                                @yield('page-title', 'Dashboard Overview')
+                            <h2 class="font-bold text-xs sm:text-base md:text-lg text-zinc-900 tracking-[0.15em] uppercase truncate">
+                                @yield('page-title', 'Dashboard')
                             </h2>
                         </div>
                         <p class="text-[10px] sm:text-[11px] font-mono-code text-zinc-400 mt-0.5 uppercase tracking-wider hidden sm:block">
@@ -165,23 +146,31 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+                <div class="flex items-center gap-2 sm:gap-4 shrink-0">
                     <a href="{{ route('home') }}" target="_blank"
-                       class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-zinc-950 px-3 py-1.5 sm:px-3.5 sm:py-2 border border-zinc-200 hover:border-zinc-900 bg-zinc-50 hover:bg-white transition">
+                       class="hidden md:inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-zinc-950 px-3 py-1.5 sm:px-3.5 sm:py-2 border border-zinc-200 hover:border-zinc-900 bg-zinc-50 hover:bg-white transition">
                         <span>Web Publik</span>
                         <span class="text-rose-600">↗</span>
                     </a>
 
-                    <div class="text-right pl-2 sm:pl-3 border-l border-zinc-200">
-                        <div class="flex items-center justify-end gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <p class="text-xs font-bold text-zinc-900 leading-none truncate max-w-[120px] sm:max-w-none">
-                                {{ auth()->user()->name ?? 'Administrator' }}
-                            </p>
+                    <div class="flex items-center justify-between gap-2 bg-zinc-900/90 border border-zinc-800/80 p-1.5 sm:p-2.5 rounded-sm shadow-sm">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="w-7 h-7 sm:w-8 sm:h-8 bg-[#881337] text-white font-black text-[10px] sm:text-[11px] flex items-center justify-center shrink-0">
+                                AD
+                            </div>
+                            <div class="truncate text-left hidden sm:block">
+                                <p class="text-xs font-bold text-white leading-none truncate">{{ auth()->user()->name ?? 'Admin Showroom' }}</p>
+                                <p class="text-[10px] text-zinc-400 mt-1 uppercase tracking-wider">Super Admin</p>
+                            </div>
                         </div>
-                        <p class="text-[10px] text-zinc-400 mt-1 uppercase tracking-wider font-mono-code hidden md:block">
-                            {{ auth()->user()->email ?? 'admin@dealer.com' }}
-                        </p>
+                        <form method="POST" action="{{ route('logout') }}" class="ml-1 sm:ml-2">
+                            @csrf
+                            <button type="submit" title="Keluar / Logout" class="p-1 sm:p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-zinc-800 transition cursor-pointer rounded-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                </svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
 

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Upload Kendaraan')
-@section('page-title', 'Upload Kendaraan')
+@section('page-title', '')
 
 @section('content')
 
@@ -19,13 +19,23 @@
             </p>
         </div>
 
-        <a href="{{ route('admin.vehicles.create') }}"
-           class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition shadow-xs">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            <span>Tambah Kendaraan Baru</span>
-        </a>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
+            <a href="{{ route('admin.vehicles.trash') }}"
+               class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-200 hover:bg-zinc-300 text-zinc-800 text-xs font-bold uppercase tracking-widest transition shadow-xs border border-zinc-300 w-full sm:w-auto">
+                <svg class="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>Riwayat Terhapus</span>
+            </a>
+
+            <a href="{{ route('admin.vehicles.create') }}"
+               class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition shadow-xs w-full sm:w-auto">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>Tambah Kendaraan Baru</span>
+            </a>
+        </div>
     </div>
 
     {{-- ALERT MESSAGES --}}
@@ -47,67 +57,19 @@
         </div>
     @endif
 
-    {{-- SEARCH & FILTER BAR --}}
-    <div class="bg-white border border-zinc-200 p-5 mb-6 shadow-xs">
-        <form method="GET" action="{{ route('admin.vehicles.index') }}">
-            <div class="flex flex-col lg:flex-row gap-4">
 
-                {{-- SEARCH INPUT --}}
-                <div class="flex-1">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
-                        Pencarian Kendaraan
-                    </label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                        </span>
-                        <input type="text"
-                               name="search"
-                               value="{{ request('search') }}"
-                               placeholder="Cari Kode Stok, Merek, Model, atau Plat Nomor..."
-                               class="w-full pl-9 pr-4 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-800 text-xs focus:bg-white focus:border-zinc-900 focus:outline-none transition">
-                    </div>
-                </div>
 
-                {{-- STATUS DROPDOWN --}}
-                <div class="w-full lg:w-56">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
-                        Status Unit
-                    </label>
-                    <select name="status"
-                            class="w-full px-3 py-2.5 bg-white border border-zinc-300 text-zinc-800 text-xs focus:outline-none focus:border-zinc-900 transition">
-                        <option value="">Semua Status</option>
-                        <option value="AVAILABLE" {{ request('status') == 'AVAILABLE' ? 'selected' : '' }}>Tersedia (Ready)</option>
-                        <option value="RESERVED" {{ request('status') == 'RESERVED' ? 'selected' : '' }}>Tanda Jadi (Booked)</option>
-                        <option value="SOLD" {{ request('status') == 'SOLD' ? 'selected' : '' }}>Terjual (Sold)</option>
-                        <option value="SERVICE" {{ request('status') == 'SERVICE' ? 'selected' : '' }}>Servis (Service)</option>
-                        <option value="INACTIVE" {{ request('status') == 'INACTIVE' ? 'selected' : '' }}>Nonaktif</option>
-                    </select>
-                </div>
-
-                {{-- ACTION BUTTONS --}}
-                <div class="flex items-end gap-2">
-                    <button type="submit"
-                            class="px-5 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                        <span>Cari</span>
-                    </button>
-
-                    @if(request()->hasAny(['search', 'status']))
-                        <a href="{{ route('admin.vehicles.index') }}"
-                           class="px-4 py-2.5 bg-zinc-100 hover:bg-rose-50 text-zinc-700 hover:text-rose-700 border border-zinc-200 hover:border-rose-200 text-xs font-bold uppercase tracking-wider transition flex items-center gap-1">
-                            <span>✕</span>
-                            <span>Reset</span>
-                        </a>
-                    @endif
-                </div>
-
-            </div>
-        </form>
+    {{-- INFO KUOTA PIN BERANDA --}}
+    <div class="mb-4 px-4 py-3 bg-white border border-zinc-200 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div class="flex items-center gap-2 text-xs text-zinc-600">
+            <svg class="w-4 h-4 text-[#881337] shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M16 3a1 1 0 0 1 .7 1.7L15 6.4v4.2l2.7 2.7a1 1 0 0 1-.7 1.7h-4v5a1 1 0 0 1-2 0v-5H7a1 1 0 0 1-.7-1.7L9 10.6V6.4L7.3 4.7A1 1 0 0 1 8 3h8z"/>
+            </svg>
+            <span>Unit yang di-<b>Pin</b> akan tampil di <b>3 posisi teratas beranda</b> (hanya unit berstatus TERSEDIA).</span>
+        </div>
+        <span class="text-[11px] font-mono-code font-bold uppercase tracking-wider {{ $pinnedCount >= \App\Models\Vehicle::MAX_PINNED ? 'text-rose-700' : 'text-zinc-900' }}">
+            Pin terpakai: {{ $pinnedCount }} / {{ \App\Models\Vehicle::MAX_PINNED }}
+        </span>
     </div>
 
     {{-- INVENTORY TABLE --}}
@@ -115,7 +77,7 @@
         @if ($vehicles->count() > 0)
             <div class="overflow-x-auto">
                 <table class="w-full text-xs">
-                    <thead class="bg-zinc-100/90 border-b border-zinc-200 text-zinc-600 uppercase tracking-wider text-[10px] font-bold">
+                    <thead class="bg-zinc-100/90 border-b border-zinc-200 text-zinc-600 uppercase tracking-wider text-[10px] font-bold whitespace-nowrap">
                         <tr>
                             <th class="px-5 py-3.5 text-left">No</th>
                             <th class="px-5 py-3.5 text-left">Kode Stok</th>
@@ -130,13 +92,19 @@
 
                     <tbody class="divide-y divide-zinc-100">
                         @foreach ($vehicles as $vehicle)
-                            <tr class="hover:bg-zinc-50/80 transition">
+                            <tr class="transition {{ $vehicle->is_pinned ? 'bg-rose-50/40 hover:bg-rose-50/70' : 'hover:bg-zinc-50/80' }}">
                                 <td class="px-5 py-4 text-zinc-400 font-mono-code">
                                     {{ $loop->iteration + ($vehicles->currentPage() - 1) * $vehicles->perPage() }}
                                 </td>
 
-                                <td class="px-5 py-4 font-mono-code font-bold text-zinc-900">
+                                <td class="px-5 py-4 font-mono-code font-bold text-zinc-900 whitespace-nowrap">
                                     {{ $vehicle->stock_code }}
+                                    @if ($vehicle->is_pinned)
+                                        <span class="ml-1 inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[#881337] text-white align-middle" title="Di-pin di beranda">
+                                            <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 3a1 1 0 0 1 .7 1.7L15 6.4v4.2l2.7 2.7a1 1 0 0 1-.7 1.7h-4v5a1 1 0 0 1-2 0v-5H7a1 1 0 0 1-.7-1.7L9 10.6V6.4L7.3 4.7A1 1 0 0 1 8 3h8z"/></svg>
+                                            PIN
+                                        </span>
+                                    @endif
                                 </td>
 
                                 <td class="px-5 py-4 text-zinc-600">
@@ -184,7 +152,7 @@
                                     @endif
                                 </td>
 
-                                <td class="px-5 py-4 text-right">
+                                <td class="px-5 py-4 text-right whitespace-nowrap">
                                     <div class="inline-flex items-center gap-1.5 justify-end">
                                         <a href="{{ route('admin.vehicles.show', $vehicle) }}"
                                            class="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider border border-zinc-200 bg-white hover:bg-zinc-100 text-zinc-700 transition"
@@ -197,6 +165,30 @@
                                            title="Edit Data Unit">
                                             Edit
                                         </a>
+
+                                        {{-- PIN / LEPAS PIN BERANDA --}}
+                                        <form action="{{ route('admin.vehicles.pin', $vehicle) }}"
+                                              method="POST"
+                                              class="inline-block">
+                                            @csrf
+                                            @method('PATCH')
+                                            @if ($vehicle->is_pinned)
+                                                <button type="submit"
+                                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider border border-[#881337] bg-[#881337] hover:bg-[#6b0f2b] text-white transition cursor-pointer"
+                                                        title="Lepas pin dari beranda">
+                                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M16 3a1 1 0 0 1 .7 1.7L15 6.4v4.2l2.7 2.7a1 1 0 0 1-.7 1.7h-4v5a1 1 0 0 1-2 0v-5H7a1 1 0 0 1-.7-1.7L9 10.6V6.4L7.3 4.7A1 1 0 0 1 8 3h8z"/></svg>
+                                                    Unpin
+                                                </button>
+                                            @else
+                                                <button type="submit"
+                                                        @if ($pinnedCount >= \App\Models\Vehicle::MAX_PINNED) disabled @endif
+                                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-amber-50"
+                                                        title="{{ $pinnedCount >= \App\Models\Vehicle::MAX_PINNED ? 'Kuota pin penuh (maks. 3)' : 'Pin ke 3 teratas beranda' }}">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linejoin="round" d="M16 3a1 1 0 0 1 .7 1.7L15 6.4v4.2l2.7 2.7a1 1 0 0 1-.7 1.7h-4v5a1 1 0 0 1-2 0v-5H7a1 1 0 0 1-.7-1.7L9 10.6V6.4L7.3 4.7A1 1 0 0 1 8 3h8z"/></svg>
+                                                    Pin
+                                                </button>
+                                            @endif
+                                        </form>
 
                                         <form action="{{ route('admin.vehicles.destroy', $vehicle) }}"
                                               method="POST"

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
-use App\Models\Sale;
 use App\Models\Vehicle;
 use Illuminate\View\View;
 
@@ -21,24 +19,61 @@ class DashboardController extends Controller
      *
      * @return View
      */
-    public function index(): View
+    public function index(\Illuminate\Http\Request $request): View
     {
-        // 1. Agregasi Statistik Inventaris Kendaraan Showroom
-        $totalVehicles     = Vehicle::count();
-        $availableVehicles = Vehicle::where('status', Vehicle::STATUS_AVAILABLE)->count();
-        $soldVehicles      = Vehicle::where('status', Vehicle::STATUS_SOLD)->count();
-        $reservedVehicles  = Vehicle::where('status', Vehicle::STATUS_RESERVED)->count();
+        // 1. Ambil nilai filter bulan dan tahun dari request (jika kosong, gunakan bulan dan tahun saat ini)
+        $month = $request->input('month', date('m'));
+        $year = $request->input('year', date('Y'));
 
-        // 2. Total Pelanggan Aktif Terdaftar
-        $totalCustomers = Customer::count();
+        // 2. Hitung jumlah Motor yang Masuk (berdasarkan tanggal dibuat / created_at)
+        $motorMasuk = Vehicle::whereHas('vehicleType', function ($q) {
+            $q->whereRaw('LOWER(name) = ?', ['motor']);
+        })->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
 
-        // 3. 5 Mutasi In Out Kendaraan Terbaru
-        $recentLogs = \App\Models\VehicleLog::latest('action_at')
-            ->latest('id')
-            ->take(5)
-            ->get();
+        // 3. Hitung jumlah Mobil yang Masuk (berdasarkan tanggal dibuat / created_at)
+        $mobilMasuk = Vehicle::whereHas('vehicleType', function ($q) {
+            $q->whereRaw('LOWER(name) = ?', ['mobil']);
+        })->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
 
-        // 4. 6 Unit Kendaraan Terbaru yang Masuk ke Showroom
+        // 4. Hitung jumlah Motor yang Terjual
+        // - Termasuk kendaraan dengan status SOLD (Terjual)
+        // - ATAU kendaraan yang telah dihapus (Soft Deleted)
+        $motorTerjual = Vehicle::withTrashed()
+            ->whereHas('vehicleType', function ($q) {
+                $q->whereRaw('LOWER(name) = ?', ['motor']);
+            })
+            ->where(function ($query) use ($month, $year) {
+                $query->where(function ($q) use ($month, $year) {
+                    $q->where('status', Vehicle::STATUS_SOLD)
+                      ->whereMonth('updated_at', $month)
+                      ->whereYear('updated_at', $year);
+                })->orWhere(function ($q) use ($month, $year) {
+                    $q->whereNotNull('deleted_at')
+                      ->whereMonth('deleted_at', $month)
+                      ->whereYear('deleted_at', $year);
+                });
+            })->count();
+
+        // 5. Hitung jumlah Mobil yang Terjual
+        // - Termasuk kendaraan dengan status SOLD (Terjual)
+        // - ATAU kendaraan yang telah dihapus (Soft Deleted)
+        $mobilTerjual = Vehicle::withTrashed()
+            ->whereHas('vehicleType', function ($q) {
+                $q->whereRaw('LOWER(name) = ?', ['mobil']);
+            })
+            ->where(function ($query) use ($month, $year) {
+                $query->where(function ($q) use ($month, $year) {
+                    $q->where('status', Vehicle::STATUS_SOLD)
+                      ->whereMonth('updated_at', $month)
+                      ->whereYear('updated_at', $year);
+                })->orWhere(function ($q) use ($month, $year) {
+                    $q->whereNotNull('deleted_at')
+                      ->whereMonth('deleted_at', $month)
+                      ->whereYear('deleted_at', $year);
+                });
+            })->count();
+
+        // 6. Ambil 6 Unit Kendaraan Terbaru yang Masuk ke Showroom untuk ditampilkan di bawah kotak statistik
         $vehicles = Vehicle::with([
             'brand',
             'model',
@@ -48,15 +83,15 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        // 5. Render Tampilan View Dashboard
+        // 7. Render Tampilan View Dashboard dan kirim semua variabel yang sudah dihitung
         return view('admin.dashboard.index', compact(
-            'totalVehicles',
-            'availableVehicles',
-            'soldVehicles',
-            'reservedVehicles',
-            'totalCustomers',
-            'recentLogs',
-            'vehicles'
+            'motorMasuk',
+            'mobilMasuk',
+            'motorTerjual',
+            'mobilTerjual',
+            'vehicles',
+            'month',
+            'year'
         ));
     }
 }

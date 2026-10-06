@@ -9,10 +9,7 @@ use App\Http\Controllers\Website\VehicleController as WebsiteVehicleController;
 // Controller Panel Administrasi (Akses Pengelola / Staf)
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\VehicleController;
-use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\VehicleImageController;
-use App\Http\Controllers\Admin\SaleController;
-use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\VehicleTypeController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\VehicleModelController;
@@ -61,6 +58,15 @@ Route::prefix('admin')
         // ==========================================
         // 2. MANAJEMEN INVENTARIS KENDARAAN (VEHICLES)
         // ==========================================
+        Route::get('/vehicles/trash', [VehicleController::class, 'trash'])
+            ->name('vehicles.trash');
+
+        Route::post('/vehicles/{id}/restore', [VehicleController::class, 'restore'])
+            ->name('vehicles.restore');
+
+        Route::delete('/vehicles/{id}/force-delete', [VehicleController::class, 'forceDelete'])
+            ->name('vehicles.force-delete');
+
         Route::get('/vehicles', [VehicleController::class, 'index'])
             ->name('vehicles.index');
 
@@ -81,6 +87,10 @@ Route::prefix('admin')
 
         Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])
             ->name('vehicles.destroy');
+
+        // Pin / lepas pin unit di 3 posisi teratas beranda publik
+        Route::patch('/vehicles/{vehicle}/pin', [VehicleController::class, 'togglePin'])
+            ->name('vehicles.pin');
 
         // ==========================================
         // 3. ENDPOINT AJAX MASTER DATA (SEARCH & MODAL QUICK-CREATE)
@@ -121,62 +131,6 @@ Route::prefix('admin')
         Route::patch('/vehicles/{vehicle}/images/{image}/primary', [VehicleImageController::class, 'setPrimary'])
             ->name('vehicles.images.primary');
 
-        // ==========================================
-        // 5. MANAJEMEN DATA PELANGGAN (CUSTOMERS)
-        // ==========================================
-        Route::get('/customers', [CustomerController::class, 'index'])
-            ->name('customers.index');
-
-        Route::get('/customers/create', [CustomerController::class, 'create'])
-            ->name('customers.create');
-
-        Route::post('/customers', [CustomerController::class, 'store'])
-            ->name('customers.store');
-
-        Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])
-            ->name('customers.edit');
-
-        Route::put('/customers/{customer}', [CustomerController::class, 'update'])
-            ->name('customers.update');
-
-        Route::get('/customers/{customer}', [CustomerController::class, 'show'])
-            ->name('customers.show');
-
-        Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])
-            ->name('customers.destroy');
-
-        // ==========================================
-        // 6. TRANSAKSI PENJUALAN UNIT (SALES)
-        // ==========================================
-        Route::get('/sales', [SaleController::class, 'index'])
-            ->name('sales.index');
-
-        Route::get('/sales/create', [SaleController::class, 'create'])
-            ->name('sales.create');
-
-        Route::post('/sales', [SaleController::class, 'store'])
-            ->name('sales.store');
-
-        Route::get('/sales/{sale}/edit', [SaleController::class, 'edit'])
-            ->name('sales.edit');
-
-        Route::get('/sales/{sale}', [SaleController::class, 'show'])
-            ->name('sales.show');
-
-        Route::put('/sales/{sale}', [SaleController::class, 'update'])
-            ->name('sales.update');
-
-        Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel'])
-            ->name('sales.cancel');
-
-        // ==========================================
-        // 7. LAPORAN & EKSPOR DATA KEUANGAN (REPORTS)
-        // ==========================================
-        Route::get('/reports', [ReportController::class, 'sales'])
-            ->name('reports.sales');
-
-        Route::get('/reports/sales/export', [ReportController::class, 'exportSales'])
-            ->name('reports.sales.export');
     });
 
 /*

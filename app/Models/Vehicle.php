@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Model Data Utama Kendaraan (Mobil & Motor).
@@ -45,6 +46,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Vehicle extends Model
 {
+    use SoftDeletes;
+
     /**
      * Definisi konstanta status unit inventaris showroom:
      */
@@ -53,6 +56,11 @@ class Vehicle extends Model
     public const STATUS_SOLD      = 'SOLD';       // Sudah terjual lunas
     public const STATUS_SERVICE   = 'SERVICE';    // Sedang perbaikan / salon / inspeksi teknis
     public const STATUS_INACTIVE  = 'INACTIVE';   // Dinonaktifkan dari listing (tidak tampil di publik)
+
+    /**
+     * Jumlah maksimal unit yang dapat di-pin (disematkan) di posisi teratas beranda publik.
+     */
+    public const MAX_PINNED = 3;
 
     /**
      * Kolom tabel yang dapat diisi secara massal (Mass Assignment).
@@ -78,6 +86,8 @@ class Vehicle extends Model
         'purchase_price',
         'selling_price',
         'status',
+        'is_pinned',
+        'pinned_at',
         'description',
     ];
 
@@ -93,6 +103,8 @@ class Vehicle extends Model
         'registration_year' => 'integer',
         'purchase_price'    => 'decimal:2',
         'selling_price'     => 'decimal:2',
+        'is_pinned'         => 'boolean',
+        'pinned_at'         => 'datetime',
     ];
 
     /**

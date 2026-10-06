@@ -29,8 +29,8 @@ class VehicleImageController extends Controller
     public function store(Request $request, Vehicle $vehicle): RedirectResponse
     {
         $request->validate([
-            'image' => [
-                'required',
+            'images' => 'required|array',
+            'images.*' => [
                 'image',
                 'mimes:jpg,jpeg,png,webp',
                 'max:10240', // Batas ukuran berkas maksimal 10MB
@@ -38,18 +38,23 @@ class VehicleImageController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $vehicle) {
-            // Cek apakah unit kendaraan sudah memiliki foto sebelumnya
             $hasImages = $vehicle->images()->exists();
+            $currentSort = $vehicle->images()->count();
 
-            // Simpan berkas gambar fisik ke direktori storage/app/public/vehicles
-            $path = $request->file('image')->store('vehicles', 'public');
+            foreach ($request->file('images') as $file) {
+                // Simpan berkas gambar fisik ke direktori storage/app/public/vehicles
+                $path = $file->store('vehicles', 'public');
 
-            // Jika belum ada foto sama sekali, foto pertama ini otomatis menjadi foto utama (primary)
-            $vehicle->images()->create([
-                'image_path' => $path,
-                'is_primary' => !$hasImages,
-                'sort_order' => $vehicle->images()->count(),
-            ]);
+                // Jika belum ada foto sama sekali, foto pertama ini otomatis menjadi foto utama (primary)
+                $vehicle->images()->create([
+                    'image_path' => $path,
+                    'is_primary' => !$hasImages,
+                    'sort_order' => $currentSort,
+                ]);
+
+                $hasImages = true;
+                $currentSort++;
+            }
         });
 
         return back()->with('success', 'Foto kendaraan berhasil diunggah dan ditambahkan ke galeri.');

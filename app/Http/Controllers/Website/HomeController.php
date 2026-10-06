@@ -26,7 +26,9 @@ class HomeController extends Controller
      */
     public function index(): View
     {
-        // 1. Ambil 6 unit kendaraan terbaru yang berstatus siap dijual (AVAILABLE)
+        // 1. Ambil 6 unit kendaraan berstatus siap dijual (AVAILABLE).
+        //    Unit yang di-pin admin (maks. 3) selalu tampil di posisi teratas sesuai urutan pin,
+        //    sisanya diisi unit terbaru.
         $vehicles = Vehicle::with([
             'brand',
             'model',
@@ -34,6 +36,8 @@ class HomeController extends Controller
             'primaryImage',
         ])
             ->where('status', Vehicle::STATUS_AVAILABLE)
+            ->orderByDesc('is_pinned')
+            ->orderBy('pinned_at')
             ->latest()
             ->take(6)
             ->get();

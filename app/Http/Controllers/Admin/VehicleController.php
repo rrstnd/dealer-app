@@ -57,13 +57,18 @@ class VehicleController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Ambil data terbaru dengan paginasi 10 item dan sertakan parameter URL filter
+        // Ambil data (unit yang di-pin tampil paling atas), paginasi 10 item dan sertakan parameter URL filter
         $vehicles = $query
+            ->orderByDesc('is_pinned')
+            ->orderBy('pinned_at')
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.vehicles.index', compact('vehicles'));
+        // Jumlah unit yang sedang di-pin di beranda (untuk info kuota pin)
+        $pinnedCount = Vehicle::where('is_pinned', true)->count();
+
+        return view('admin.vehicles.index', compact('vehicles', 'pinnedCount'));
     }
 
     /**
@@ -368,7 +373,7 @@ class VehicleController extends Controller
         // Catat Log OUT (Kendaraan Hapus/Keluar dari Website)
         VehicleLog::create([
             'type'          => 'OUT',
-            'vehicle_id'    => null,
+            'vehicle_id'    => $vehicle->id,
             'stock_code'    => $vehicle->stock_code,
             'vehicle_name'  => $vehicleName ?: 'Kendaraan ' . $vehicle->stock_code,
             'license_plate' => $vehicle->license_plate,
@@ -378,11 +383,156 @@ class VehicleController extends Controller
             'notes'         => 'Kendaraan dihapus dari website.',
         ]);
 
+        // Lepas pin beranda sebelum dihapus agar kuota pin kembali tersedia
+        $vehicle->update(['is_pinned' => false, 'pinned_at' => null]);
+
         $vehicle->delete();
 
         return redirect()
             ->route('admin.vehicles.index')
-            ->with('success', 'Kendaraan berhasil dihapus dari inventaris.');
+            ->with('success', 'Kendaraan berhasil dihapus dari inventaris dan dipindahkan ke riwayat terhapus.');
+    }
+
+    /**
+     * Menyematkan (pin) / melepas pin unit kendaraan pada 3 posisi teratas beranda publik.
+     * Maksimal unit yang dapat di-pin dibatasi oleh Vehicle::MAX_PINNED.
+     *
+     * @param Vehicle $vehicle
+     * @return RedirectResponse
+     */
+    public function togglePin(Vehicle $vehicle): RedirectResponse
+    {
+        // Lepas pin
+        if ($vehicle->is_pinned) {
+            $vehicle->update(['is_pinned' => false, 'pinned_at' => null]);
+
+            return back()->with('success', 'Unit ' . $vehicle->stock_code . ' dilepas dari pin beranda.');
+        }
+
+        // Validasi kuota pin
+        $pinnedCount = Vehicle::where('is_pinned', true)->count();
+
+        if ($pinnedCount >= Vehicle::MAX_PINNED) {
+            return back()->with('error', 'Maksimal ' . Vehicle::MAX_PINNED . ' unit yang dapat di-pin di beranda. Lepas pin salah satu unit terlebih dahulu.');
+        }
+
+        $vehicle->update(['is_pinned' => true, 'pinned_at' => now()]);
+
+        $message = 'Unit ' . $vehicle->stock_code . ' berhasil di-pin ke beranda.';
+        if ($vehicle->status !== Vehicle::STATUS_AVAILABLE) {
+            $message .= ' Catatan: unit hanya tampil di beranda jika berstatus TERSEDIA.';
+        }
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Menampilkan riwayat kendaraan (mobil & motor) yang telah dihapus (Soft Deleted).
+     *
+     * @param Request $request
+     * @return View
+     */
+    public function trash(Request $request): View
+    {
+        $query = Vehicle::onlyTrashed()->with([
+            'vehicleType',
+            'brand',
+            'model',
+        ]);
+
+        // Filter Pencarian: Kode Stok, Plat Nomor, Nama Brand, atau Nama Model
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('stock_code', 'like', "%{$search}%")
+                    ->orWhere('license_plate', 'like', "%{$search}%")
+                    ->orWhereHas('brand', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('model', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Filter Berdasarkan Tipe Kendaraan (Mobil / Motor)
+        if ($request->filled('type')) {
+            $type = strtolower($request->type);
+            $query->whereHas('vehicleType', function ($q) use ($type) {
+                $q->whereRaw('LOWER(name) = ?', [$type]);
+            });
+        }
+
+        // Ringkasan Statistik Kendaraan Terhapus
+        $totalTrashed = Vehicle::onlyTrashed()->count();
+        $totalMobilTrashed = Vehicle::onlyTrashed()->whereHas('vehicleType', function ($q) {
+            $q->whereRaw('LOWER(name) = ?', ['mobil']);
+        })->count();
+        $totalMotorTrashed = Vehicle::onlyTrashed()->whereHas('vehicleType', function ($q) {
+            $q->whereRaw('LOWER(name) = ?', ['motor']);
+        })->count();
+
+        $vehicles = $query
+            ->orderBy('deleted_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.vehicles.trash', compact(
+            'vehicles',
+            'totalTrashed',
+            'totalMobilTrashed',
+            'totalMotorTrashed'
+        ));
+    }
+
+    /**
+     * Memulihkan (restore) data unit kendaraan yang telah dihapus kembali ke inventaris aktif.
+     *
+     * @param int $id
+     * @return RedirectResponse
+     */
+    public function restore(int $id): RedirectResponse
+    {
+        $vehicle = Vehicle::onlyTrashed()->findOrFail($id);
+        $vehicle->restore();
+
+        // Catat Log IN (Kendaraan dipulihkan kembali ke website)
+        $vehicleName = trim(($vehicle->brand->name ?? '') . ' ' . ($vehicle->model->name ?? '') . ' (' . $vehicle->year . ')');
+
+        VehicleLog::create([
+            'type'          => 'IN',
+            'vehicle_id'    => $vehicle->id,
+            'stock_code'    => $vehicle->stock_code,
+            'vehicle_name'  => $vehicleName ?: 'Kendaraan ' . $vehicle->stock_code,
+            'license_plate' => $vehicle->license_plate,
+            'price'         => $vehicle->selling_price,
+            'user_name'     => auth()->user()->name ?? 'Admin',
+            'action_at'     => now(),
+            'notes'         => 'Kendaraan dipulihkan dari riwayat terhapus.',
+        ]);
+
+        return redirect()
+            ->route('admin.vehicles.trash')
+            ->with('success', 'Kendaraan dengan kode stok ' . $vehicle->stock_code . ' berhasil dipulihkan ke inventaris aktif.');
+    }
+
+    /**
+     * Menghapus secara permanen (force delete) data kendaraan dari database.
+     *
+     * @param int $id
+     * @return RedirectResponse
+     */
+    public function forceDelete(int $id): RedirectResponse
+    {
+        $vehicle = Vehicle::onlyTrashed()->findOrFail($id);
+        $stockCode = $vehicle->stock_code;
+
+        $vehicle->forceDelete();
+
+        return redirect()
+            ->route('admin.vehicles.trash')
+            ->with('success', 'Data unit kendaraan (' . $stockCode . ') telah dihapus secara permanen.');
     }
 
     /**
@@ -394,7 +544,8 @@ class VehicleController extends Controller
      */
     private function generateNextStockCode(): string
     {
-        $lastNumber = Vehicle::where('stock_code', 'like', 'STK-%')
+        $lastNumber = Vehicle::withTrashed()
+            ->where('stock_code', 'like', 'STK-%')
             ->get(['stock_code'])
             ->map(function ($vehicle) {
                 return (int) str_replace('STK-', '', $vehicle->stock_code);

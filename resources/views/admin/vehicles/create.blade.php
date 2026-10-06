@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Tambah Kendaraan Baru')
-@section('page-title', 'Tambah Kendaraan')
+@section('page-title', '')
 
 @section('content')
 
@@ -200,41 +200,7 @@
                            class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs font-mono-code focus:bg-white focus:border-zinc-900 focus:outline-none transition">
                 </div>
 
-                {{-- Plat Nomor --}}
-                <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                        Nomor Polisi (Plat)
-                    </label>
-                    <input type="text"
-                           name="license_plate"
-                           value="{{ old('license_plate') }}"
-                           placeholder="Contoh: B 1234 XYZ"
-                           class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs uppercase font-mono-code focus:bg-white focus:border-zinc-900 focus:outline-none transition">
-                </div>
 
-                {{-- Nomor Rangka --}}
-                <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                        Nomor Rangka (VIN)
-                    </label>
-                    <input type="text"
-                           name="chassis_number"
-                           value="{{ old('chassis_number') }}"
-                           placeholder="Nomor Rangka Kendaraan"
-                           class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs uppercase font-mono-code focus:bg-white focus:border-zinc-900 focus:outline-none transition">
-                </div>
-
-                {{-- Nomor Mesin --}}
-                <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                        Nomor Mesin
-                    </label>
-                    <input type="text"
-                           name="engine_number"
-                           value="{{ old('engine_number') }}"
-                           placeholder="Nomor Mesin Kendaraan"
-                           class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs uppercase font-mono-code focus:bg-white focus:border-zinc-900 focus:outline-none transition">
-                </div>
             </div>
         </div>
 
@@ -248,19 +214,9 @@
             </div>
 
             <div class="p-6 space-y-5">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                    {{-- Purchase Price --}}
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                            Harga Beli / Modal (Rp) <span class="text-rose-600">*</span>
-                        </label>
-                        <input type="number"
-                               name="purchase_price"
-                               value="{{ old('purchase_price') }}"
-                               placeholder="Contoh: 180000000"
-                               required
-                               class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs font-mono-code focus:bg-white focus:border-zinc-900 focus:outline-none transition">
-                    </div>
+                <div class="grid grid-cols-1 gap-5">
+                    {{-- Hidden Purchase Price --}}
+                    <input type="hidden" name="purchase_price" value="0">
 
                     {{-- Selling Price --}}
                     <div>
@@ -275,21 +231,8 @@
                                class="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 text-zinc-900 text-xs font-mono-code font-bold focus:bg-white focus:border-zinc-900 focus:outline-none transition">
                     </div>
 
-                    {{-- Status --}}
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                            Status Inventaris <span class="text-rose-600">*</span>
-                        </label>
-                        <select name="status"
-                                required
-                                class="w-full px-3 py-2.5 bg-white border border-zinc-300 text-zinc-800 text-xs focus:outline-none focus:border-zinc-900 transition">
-                            <option value="AVAILABLE" {{ old('status', 'AVAILABLE') === 'AVAILABLE' ? 'selected' : '' }}>Tersedia (Ready Stock)</option>
-                            <option value="RESERVED" {{ old('status') === 'RESERVED' ? 'selected' : '' }}>Tanda Jadi (Booked)</option>
-                            <option value="SOLD" {{ old('status') === 'SOLD' ? 'selected' : '' }}>Terjual (Sold)</option>
-                            <option value="SERVICE" {{ old('status') === 'SERVICE' ? 'selected' : '' }}>Servis (Maintenance)</option>
-                            <option value="INACTIVE" {{ old('status') === 'INACTIVE' ? 'selected' : '' }}>Nonaktif</option>
-                        </select>
-                    </div>
+                    {{-- Default Status --}}
+                    <input type="hidden" name="status" value="AVAILABLE">
                 </div>
 
                 {{-- Description --}}
@@ -306,14 +249,14 @@
         </div>
 
         {{-- ACTION BUTTONS --}}
-        <div class="flex items-center justify-end gap-3 pt-2">
+        <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
             <a href="{{ route('admin.vehicles.index') }}"
-               class="px-5 py-2.5 border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-bold uppercase tracking-wider transition">
+               class="px-5 py-2.5 border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-bold uppercase tracking-wider transition text-center w-full sm:w-auto">
                 Batal
             </a>
 
             <button type="submit"
-                    class="px-6 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition shadow-xs flex items-center gap-2">
+                    class="px-6 py-2.5 bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition shadow-xs flex items-center justify-center gap-2 w-full sm:w-auto">
                 <span>Simpan Kendaraan</span>
                 <span>→</span>
             </button>
