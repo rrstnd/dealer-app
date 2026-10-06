@@ -33,7 +33,7 @@
     @endif
 
     {{-- FORM CONTAINER (CARITA LUXURY DESIGN) --}}
-    <form action="{{ route('admin.vehicles.store') }}" method="POST" class="space-y-6">
+    <form action="{{ route('admin.vehicles.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
 
         {{-- SECTION 1: INFORMASI UTAMA & MODEL --}}
@@ -248,6 +248,100 @@
             </div>
         </div>
 
+        {{-- SECTION 4: DOKUMENTASI & FOTO KENDARAAN --}}
+        <div class="bg-white border border-zinc-200 shadow-xs" x-data="photoUploader()">
+            <div class="px-6 py-4 border-b border-zinc-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-[#881337]"></span>
+                    <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-zinc-900">
+                        4. Dokumentasi & Foto Kendaraan
+                    </h2>
+                </div>
+                <span class="text-[10px] font-mono-code uppercase tracking-wider text-zinc-400">
+                    Opsional (Maks. 10MB per foto)
+                </span>
+            </div>
+
+            <div class="p-6 space-y-4">
+                {{-- DROPZONE UPLOAD AREA --}}
+                <div class="border-2 border-dashed border-zinc-300 hover:border-zinc-900 bg-zinc-50/70 hover:bg-white p-6 sm:p-8 text-center transition cursor-pointer relative group rounded-none"
+                     @dragover.prevent
+                     @drop.prevent="handleDrop($event)">
+
+                    <input type="file"
+                           id="vehicle-images-input"
+                           name="images[]"
+                           accept=".jpg,.jpeg,.png,.webp"
+                           multiple
+                           @change="handleFiles($event)"
+                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+
+                    <div class="space-y-2">
+                        <div class="w-12 h-12 mx-auto bg-zinc-100 border border-zinc-200 text-zinc-700 flex items-center justify-center rounded-sm group-hover:scale-105 group-hover:bg-[#881337] group-hover:text-white transition duration-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-zinc-900">
+                                Klik atau seret foto ke area ini
+                            </p>
+                            <p class="text-[11px] text-zinc-500 mt-1">
+                                Format didukung: <span class="font-mono-code text-zinc-700">JPG, JPEG, PNG, WEBP</span>. Bisa pilih beberapa foto sekaligus.
+                            </p>
+                            <p class="text-[10px] text-rose-600 font-semibold mt-1">
+                                ★ Foto pertama yang dipilih otomatis menjadi Foto Utama (Cover Depan) di katalog.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- PREVIEW GRID CONTAINER --}}
+                <div x-show="previews.length > 0" x-cloak class="space-y-3 pt-2">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-zinc-900">
+                                Pratinjau Foto Siap Diunggah
+                            </span>
+                            <span class="text-[11px] font-mono-code font-bold bg-[#881337] text-white px-2 py-0.5 rounded-none"
+                                  x-text="previews.length + ' Foto Dipilih'">
+                            </span>
+                        </div>
+                        <button type="button"
+                                @click="clearFiles()"
+                                class="text-[11px] font-bold uppercase tracking-wider text-rose-600 hover:text-rose-800 transition cursor-pointer">
+                            ✕ Hapus Semua Foto
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <template x-for="(preview, index) in previews" :key="index">
+                            <div class="border border-zinc-200 bg-zinc-50 overflow-hidden relative shadow-2xs group">
+                                <div class="aspect-[4/3] bg-zinc-100 relative overflow-hidden">
+                                    <img :src="preview.url" :alt="preview.name" class="w-full h-full object-cover">
+                                    <template x-if="index === 0">
+                                        <div class="absolute top-2 left-2 bg-[#881337] text-white text-[9px] font-mono-code font-bold uppercase tracking-wider px-2 py-0.5 shadow-sm">
+                                            ★ FOTO UTAMA
+                                        </div>
+                                    </template>
+                                    <template x-if="index > 0">
+                                        <div class="absolute top-2 left-2 bg-zinc-900/80 text-white text-[9px] font-mono-code font-bold uppercase tracking-wider px-2 py-0.5"
+                                             x-text="'Foto #' + (index + 1)">
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="p-2.5 bg-white border-t border-zinc-100">
+                                    <p class="text-[11px] font-medium text-zinc-800 truncate" x-text="preview.name"></p>
+                                    <p class="text-[10px] font-mono-code text-zinc-400" x-text="preview.size"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
         {{-- ACTION BUTTONS --}}
         <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
             <a href="{{ route('admin.vehicles.index') }}"
@@ -265,3 +359,46 @@
     </form>
 
 @endsection
+
+@push('scripts')
+<script>
+    function photoUploader() {
+        return {
+            previews: [],
+            handleFiles(event) {
+                const files = event.target.files;
+                this.loadFiles(files);
+            },
+            handleDrop(event) {
+                const dt = event.dataTransfer;
+                if (!dt || !dt.files) return;
+                const input = document.getElementById('vehicle-images-input');
+                if (input) {
+                    input.files = dt.files;
+                }
+                this.loadFiles(dt.files);
+            },
+            loadFiles(files) {
+                this.previews = [];
+                if (!files || files.length === 0) return;
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (file.type && file.type.startsWith('image/')) {
+                        this.previews.push({
+                            url: URL.createObjectURL(file),
+                            name: file.name,
+                            size: (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+                        });
+                    }
+                }
+            },
+            clearFiles() {
+                this.previews = [];
+                const input = document.getElementById('vehicle-images-input');
+                if (input) input.value = '';
+            }
+        }
+    }
+</script>
+@endpush

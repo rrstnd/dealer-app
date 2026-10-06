@@ -124,10 +124,14 @@ class VehicleController extends Controller
             'selling_price'     => 'required|numeric|min:0',
             'status'            => 'required|in:AVAILABLE,RESERVED,SOLD,SERVICE,INACTIVE',
             'description'       => 'nullable|string',
+
+            // Galeri Foto (Opsional saat input baru)
+            'images'            => 'nullable|array',
+            'images.*'          => 'image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
 
         // 2. Eksekusi penyimpanan dalam satu Database Transaction utuh
-        $vehicle = DB::transaction(function () use ($validated) {
+        $vehicle = DB::transaction(function () use ($validated, $request) {
 
             // A. Sinkronisasi Tipe Kendaraan (Mobil / Motor)
             $vehicleType = VehicleType::query()
@@ -187,7 +191,26 @@ class VehicleController extends Controller
                 'description'       => $validated['description'] ?? null,
             ]);
 
-            // E. Catat Log IN (Kendaraan Tambah/Masuk ke Website)
+            // E. Simpan Foto Galeri Kendaraan (Jika Dilampirkan)
+            if ($request->hasFile('images')) {
+                $hasImages = false;
+                $sortOrder = 0;
+
+                foreach ($request->file('images') as $file) {
+                    $path = $file->store('vehicles', 'public');
+
+                    $newVehicle->images()->create([
+                        'image_path' => $path,
+                        'is_primary' => !$hasImages,
+                        'sort_order' => $sortOrder,
+                    ]);
+
+                    $hasImages = true;
+                    $sortOrder++;
+                }
+            }
+
+            // F. Catat Log IN (Kendaraan Tambah/Masuk ke Website)
             VehicleLog::create([
                 'type'          => 'IN',
                 'vehicle_id'    => $newVehicle->id,
@@ -203,9 +226,15 @@ class VehicleController extends Controller
             return $newVehicle;
         });
 
+        $successMessage = 'Kendaraan berhasil ditambahkan dengan kode stok: ' . $vehicle->stock_code;
+        if ($request->hasFile('images')) {
+            $count = count($request->file('images'));
+            $successMessage .= " beserta {$count} foto galeri.";
+        }
+
         return redirect()
             ->route('admin.vehicles.index')
-            ->with('success', 'Kendaraan berhasil ditambahkan dengan kode stok: ' . $vehicle->stock_code);
+            ->with('success', $successMessage);
     }
 
     /**
