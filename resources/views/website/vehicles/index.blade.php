@@ -129,7 +129,7 @@
         </div>
 
         {{-- HORIZONTAL 6-COLUMN FILTER BAR (CARITA STYLE) --}}
-        <div class="bg-white p-6 border border-zinc-200 shadow-xs space-y-4">
+        <div class="bg-white p-4 sm:p-6 border border-zinc-200 shadow-xs space-y-4">
             <form method="GET" action="{{ route('vehicles.index') }}" class="space-y-4">
                 
                 {{-- QUICK SEARCH BAR --}}
@@ -214,25 +214,32 @@
                 </div>
 
                 {{-- SUBMIT BAR --}}
-                <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                        @if(request()->hasAny(['search', 'vehicle_type_id', 'brand_id', 'year', 'transmission', 'price_range']))
+                <div class="pt-2">
+                    @if(request()->hasAny(['search', 'vehicle_type_id', 'brand_id', 'year', 'transmission', 'price_range']))
+                        <div class="grid grid-cols-2 gap-2.5 sm:flex sm:items-center sm:justify-between sm:gap-4">
                             <a href="{{ route('vehicles.index') }}"
-                               class="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-100 hover:bg-rose-50 text-zinc-700 hover:text-rose-700 border border-zinc-200 hover:border-rose-200 text-xs font-semibold uppercase tracking-wider transition rounded-none">
-                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 bg-zinc-100 hover:bg-rose-50 text-zinc-700 hover:text-rose-700 border border-zinc-200 hover:border-rose-200 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition rounded-none text-center">
+                                <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                 </svg>
-                                <span>Atur Ulang Filter</span>
+                                <span class="truncate">Atur Ulang Filter</span>
                             </a>
-                        @endif
-                    </div>
-                    <div class="flex items-center justify-end gap-3">
-                        <button type="submit"
-                                class="bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-none transition flex items-center gap-2 shadow-xs">
-                            <span>Terapkan Filter</span>
-                            <span>→</span>
-                        </button>
-                    </div>
+
+                            <button type="submit"
+                                    class="w-full sm:w-auto bg-zinc-950 hover:bg-black text-white text-[11px] sm:text-xs font-bold uppercase tracking-widest px-4 sm:px-6 py-2.5 rounded-none transition inline-flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs cursor-pointer text-center">
+                                <span class="truncate">Terapkan Filter</span>
+                                <span class="shrink-0">→</span>
+                            </button>
+                        </div>
+                    @else
+                        <div class="flex items-center justify-end">
+                            <button type="submit"
+                                    class="w-full sm:w-auto bg-zinc-950 hover:bg-black text-white text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-none transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+                                <span>Terapkan Filter</span>
+                                <span>→</span>
+                            </button>
+                        </div>
+                    @endif
                 </div>
 
             </form>
