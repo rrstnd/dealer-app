@@ -42,7 +42,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\VehicleModel $model Model kendaraan
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VehicleImage> $images Seluruh foto galeri kendaraan
  * @property-read \App\Models\VehicleImage|null $primaryImage Foto sampul / utama kendaraan
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Sale> $sales Riwayat transaksi unit ini
  */
 class Vehicle extends Model
 {
@@ -156,15 +155,5 @@ class Vehicle extends Model
     public function primaryImage(): HasOne
     {
         return $this->hasOne(VehicleImage::class)->where('is_primary', true);
-    }
-
-    /**
-     * Relasi One-to-Many: Riwayat transaksi penjualan yang melibatkan kendaraan ini.
-     *
-     * @return HasMany
-     */
-    public function sales(): HasMany
-    {
-        return $this->hasMany(Sale::class);
     }
 }

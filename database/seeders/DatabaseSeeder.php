@@ -15,10 +15,8 @@ use Illuminate\Support\Facades\Hash;
  * 2. Master Data Jenis Kendaraan (Mobil, Motor)
  * 3. Master Data Brand / Merek Populer (Toyota, Honda, Suzuki, Yamaha)
  * 4. Master Data Model Spesifik (Avanza, Innova, Brio, City, Ertiga, NMAX)
- * 5. Data Sampel Pelanggan / Konsumen
- * 6. Data Sampel Inventaris Unit Kendaraan Siap Jual
- * 7. Galeri Foto Sampel Kendaraan
- * 8. Riwayat Transaksi Penjualan Selesai (Invoice COMPLETED)
+ * 5. Data Sampel Inventaris Unit Kendaraan Siap Jual
+ * 6. Galeri Foto Sampel Kendaraan
  */
 class DatabaseSeeder extends Seeder
 {
@@ -143,40 +141,7 @@ class DatabaseSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
-        | 5. DATA SAMPEL PELANGGAN (CUSTOMERS)
-        |--------------------------------------------------------------------------
-        */
-        $customer1 = DB::table('customers')->insertGetId([
-            'customer_code' => 'CUS-0001',
-            'name'          => 'Andi Pratama',
-            'nik'           => '3171000000000001',
-            'phone'         => '081234567890',
-            'email'         => 'andi@example.com',
-            'address'       => 'Jl. Contoh No. 1',
-            'city'          => 'Jakarta Selatan',
-            'province'      => 'DKI Jakarta',
-            'notes'         => 'Pelanggan loyal showroom',
-            'created_at'    => now(),
-            'updated_at'    => now(),
-        ]);
-
-        $customer2 = DB::table('customers')->insertGetId([
-            'customer_code' => 'CUS-0002',
-            'name'          => 'Budi Santoso',
-            'nik'           => '3171000000000002',
-            'phone'         => '081298765432',
-            'email'         => 'budi@example.com',
-            'address'       => 'Jl. Contoh No. 2',
-            'city'          => 'Tangerang Selatan',
-            'province'      => 'Banten',
-            'notes'         => 'Pelanggan cash keras',
-            'created_at'    => now(),
-            'updated_at'    => now(),
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | 6. DATA SAMPEL INVENTARIS UNIT KENDARAAN (VEHICLES)
+        | 5. DATA SAMPEL INVENTARIS UNIT KENDARAAN (VEHICLES)
         |--------------------------------------------------------------------------
         */
         $vehicles = [];
@@ -324,7 +289,7 @@ class DatabaseSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
-        | 7. FOTO SAMPUL / GALERI KENDARAAN (VEHICLE IMAGES)
+        | 6. FOTO SAMPUL / GALERI KENDARAAN (VEHICLE IMAGES)
         |--------------------------------------------------------------------------
         */
         $imageFiles = [
@@ -346,27 +311,5 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | 8. DATA DUMMY TRANSAKSI PENJUALAN SELESAI (SALES)
-        |--------------------------------------------------------------------------
-        */
-        $cityVehicleId = $vehicleIds[4];
-
-        DB::table('sales')->insert([
-            'invoice_number' => 'INV-2026-0001',
-            'customer_id'    => $customer1,
-            'vehicle_id'     => $cityVehicleId,
-            'vehicle_price'  => 305000000,
-            'discount'       => 5000000,
-            'final_price'    => 300000000,
-            'sale_date'      => now()->toDateString(),
-            'sales_person'   => 'Admin Demo Suja',
-            'status'         => 'COMPLETED',
-            'notes'          => 'Data transaksi penjualan sampel awal sistem.',
-            'created_at'     => now(),
-            'updated_at'     => now(),
-        ]);
     }
 }

@@ -8,9 +8,11 @@ use App\Models\Vehicle;
 use App\Models\VehicleLog;
 use App\Models\VehicleModel;
 use App\Models\VehicleType;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
@@ -554,14 +556,25 @@ class VehicleController extends Controller
      */
     public function forceDelete(int $id): RedirectResponse
     {
-        $vehicle = Vehicle::onlyTrashed()->findOrFail($id);
+        $vehicle = Vehicle::onlyTrashed()->with('images')->findOrFail($id);
         $stockCode = $vehicle->stock_code;
 
-        $vehicle->forceDelete();
+        try {
+            // Hapus berkas fisik gambar unit dari disk storage public
+            foreach ($vehicle->images as $image) {
+                Storage::disk('public')->delete($image->image_path);
+            }
 
-        return redirect()
-            ->route('admin.vehicles.trash')
-            ->with('success', 'Data unit kendaraan (' . $stockCode . ') telah dihapus secara permanen.');
+            $vehicle->forceDelete();
+
+            return redirect()
+                ->route('admin.vehicles.trash')
+                ->with('success', 'Data unit kendaraan (' . $stockCode . ') telah dihapus secara permanen.');
+        } catch (QueryException $e) {
+            return redirect()
+                ->route('admin.vehicles.trash')
+                ->with('error', 'Unit ' . $stockCode . ' tidak dapat dihapus permanen karena masih terhubung dengan data lain di sistem.');
+        }
     }
 
     /**
